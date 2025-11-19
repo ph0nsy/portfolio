@@ -13,7 +13,8 @@ import ProjectGallery from './custom_components/ProjectGallery';
 import LogoLoop from './react_bits_components/LogoLoop'
 import TargetCursor from './react_bits_components/TargetCursor';
 
-import { LiaHomeSolid, LiaArchiveSolid, LiaUserAltSolid, LiaGithub, LiaItchIo, LiaLinkedinIn } from 'react-icons/lia';
+import { IoIosMail } from "react-icons/io";
+import { LiaHomeSolid, LiaArchiveSolid, LiaUserAltSolid, LiaGithub, LiaItchIo, LiaLinkedinIn, LiaMailBulkSolid, LiaMailchimp } from 'react-icons/lia';
 import { SiReact, SiUnrealengine, SiJavascript, SiCplusplus, SiGit, SiMysql, SiPython } from 'react-icons/si';
 import { BiLogoUnity } from 'react-icons/bi';
 import { TbBrandCSharp } from 'react-icons/tb';
@@ -86,6 +87,7 @@ function App() {
           <div style={{ display:'inline-block', margin:'25px', backgroundColor:'black', borderRadius:'40px' }} className="cursor-target"><LiaGithub size={92} onClick={() => window.open("https://github.com/ph0nsy", "_self")} /></div>
           <div style={{ display:'inline-block', margin:'25px', backgroundColor:'#fa5c5c', borderRadius:'20px' }} className="cursor-target"><LiaItchIo size={92} onClick={() => window.open("https://ph0nsy.itch.io", "_self")} /></div>
           <div style={{ display:'inline-block', margin:'25px', backgroundColor:'#0a66c2', borderRadius:'10px' }} className="cursor-target"><LiaLinkedinIn size={92} onClick={() => window.open("https://www.linkedin.com/in/ph0nsy", "_self")} /></div>
+          <div style={{ display:'inline-block', margin:'25px', backgroundColor:'#c71610', borderRadius:'12px' }} className="cursor-target"><IoIosMail size={92} onClick={() => window.open("mailto:ph0nsydev@gmail.com", "_blank")} /></div>
         </div>}
       </footer>
     </div>
