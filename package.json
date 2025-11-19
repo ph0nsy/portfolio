@@ -4,13 +4,21 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@chakra-ui/react": "^3.29.0",
+    "@syncfusion/ej2-react-popups": "^31.2.12",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "gsap": "^3.13.0",
+    "mathjs": "^15.1.0",
+    "motion": "^12.23.24",
+    "postprocessing": "^6.38.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-icons": "^5.5.0",
     "react-scripts": "5.0.1",
+    "three": "^0.181.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
