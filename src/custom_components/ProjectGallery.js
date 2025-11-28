@@ -72,7 +72,7 @@ function ProjectGallery(){
           title: 'Lady Umbrella',
           link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
           year: '2025',
-          image: '../assets/LadyUmbrella.jpg',
+          image: 'https://raw.githubusercontent.com/ph0nsy/portfolio/refs/heads/main/src/assets/LadyUmbrella.jpg',
           description:
             'This is an example project item. You can sort through these using the tags. You can also click a tag to add it to the filter.',
           tags: [
@@ -270,13 +270,17 @@ function ProjectGallery(){
               background : 'radial-gradient(ellipse at top, ' + colorType + ', transparent), radial-gradient(ellipse at bottom, ' + colorSource + ', transparent)', 
              }
 
+
+            let widthHeader = window.innerWidth > 764 ? '70%' : '100%';
+            let alignmentHeader = window.innerWidth > 764 ? 'center' : 'left';
+
             return (
               <div key={`card-${id}`} className='card cursor-target' style={linearGradient}>
-                <a style={{ textDecoration:'none', color:'inherit' }} target="_blank" href={link}>
+                <a style={{ textDecoration:'none', color:'inherit', textdecoration:'small' }} target="_blank" href={link}>
                   <img className='cardImage' src={image} alt={'missing image'}/>
-                  <div style={{ margin:'10px' }}>
-                    <h1>{title}</h1>
-                    <h2>{year}</h2>
+                  <div style={{ width:'90%', display:'block', margin:'auto'}}>
+                    <h1 style={{ display:'inline-block', textAlign:{alignmentHeader}, width:{widthHeader} }}>{title}</h1>
+                    {window.innerWidth > 764 && <h2 style={{ display:'inline-block', textAlign:'right', width:'20%' }}>{year}</h2>}
                     <p>{description}</p>
                   </div>                  
                 </a>
