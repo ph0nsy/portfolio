@@ -53,15 +53,15 @@ function App() {
         parallaxOn={true}
       />}
       <Header id="Home" mobile={isMobile} />
-      {/*<section className="App-content">
+      <section className="App-content">
 
-        <div style={{ width: '75%', marginRight: 'auto', marginLeft: 'auto', height: '15vh',  position: 'relative', overflow: 'hidden' }}>
+        <div style={{ width: '75%', marginRight: 'auto', marginLeft: 'auto', minHeight: '15vh', maxHeight: '25vh',  position: 'relative', overflow: 'hidden' }}>
           <LogoLoop
             logos={techLogos}
             speed={60}
             direction="left"
-            logoHeight={98}
-            gap={68}
+            logoHeight={isMobile ? 50 : 98}
+            gap={isMobile ? 30 : 68}
             pauseOnHover
             scaleOnHover
             fadeOut
@@ -69,7 +69,7 @@ function App() {
             ariaLabel="Technical Skills"
           />
         </div>
-        <ProjectGallery />*/}
+        <ProjectGallery />
         {/*About + Contact (+ Portfolio link)*/} 
 
         {/*className=""*/}
@@ -78,16 +78,16 @@ function App() {
 
         {/*Portfolio (link) Showcase*/}
 
-      {/*</section>*/}
+      </section>
       {/*Contact + Footer + Socials*/}
       <footer className="App-footer">
         <Navigation mobile={isMobile} />
         {!isMobile && 
-        <div style={{ position:'fixed', marginRight:'auto', marginLeft:'auto', bottom: '150px', left:'50%', transform:'translate(-50%, 0%)' }}>
-          <div style={{ display:'inline-block', margin:'25px', backgroundColor:'black', borderRadius:'40px' }} className="cursor-target"><LiaGithub size={92} onClick={() => window.open("https://github.com/ph0nsy", "_self")} /></div>
-          <div style={{ display:'inline-block', margin:'25px', backgroundColor:'#fa5c5c', borderRadius:'20px' }} className="cursor-target"><LiaItchIo size={92} onClick={() => window.open("https://ph0nsy.itch.io", "_self")} /></div>
-          <div style={{ display:'inline-block', margin:'25px', backgroundColor:'#0a66c2', borderRadius:'10px' }} className="cursor-target"><LiaLinkedinIn size={92} onClick={() => window.open("https://www.linkedin.com/in/ph0nsy", "_self")} /></div>
-          <div style={{ display:'inline-block', margin:'25px', backgroundColor:'#c71610', borderRadius:'12px' }} className="cursor-target"><IoIosMail size={92} onClick={() => window.open("mailto:ph0nsydev@gmail.com", "_blank")} /></div>
+        <div style={{ position:'fixed', marginRight:'auto', marginLeft:'auto', bottom: '20px', left:'94%', transform:'translate(-50%, 0%)' }}>
+          <div style={{ display:'inline-block', margin:'10px', backgroundColor:'#000000', borderRadius:'50px', padding:'5px' }} className="cursor-target"><LiaGithub size={36} onClick={() => window.open("https://github.com/ph0nsy", "_self")} /></div>
+          <div style={{ display:'inline-block', margin:'10px', backgroundColor:'#fa5c5c', borderRadius:'50px', padding:'5px' }} className="cursor-target"><LiaItchIo size={36} onClick={() => window.open("https://ph0nsy.itch.io", "_self")} /></div>
+          <div style={{ display:'inline-block', margin:'10px', backgroundColor:'#0a66c2', borderRadius:'50px', padding:'5px' }} className="cursor-target"><LiaLinkedinIn size={36} onClick={() => window.open("https://www.linkedin.com/in/ph0nsy", "_self")} /></div>
+          <div style={{ display:'inline-block', margin:'10px', backgroundColor:'#c71610', borderRadius:'50px', padding:'5px' }} className="cursor-target"><IoIosMail size={36} onClick={() => window.open("mailto:ph0nsydev@gmail.com", "_blank")} /></div>
         </div>}
       </footer>
     </div>

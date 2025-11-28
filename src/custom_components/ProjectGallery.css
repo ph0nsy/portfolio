@@ -2,20 +2,59 @@
     padding: 5px;
     background-color: #cfeed6;
     border-radius: 10%;
-    margin: 5px;
+    margin: 5px 5px 20px 5px;
 }
 
 .tag-button:hover {
     background-color: #cfeed67f;
 }
 
-.card {
-    padding: 20px;
-    width: 100%;
-    background-color: rgb(255, 215, 175);
-    margin: 10px 0;
+@-webkit-keyframes fade-in {
+    0% {
+      /*-webkit-transform: translateY(50px);
+              transform: translateY(50px);*/
+      opacity: 0;
+    }
+    100% {
+      /*-webkit-transform: translateY(0);
+              transform: translateY(0);*/
+      opacity: 1;
+    }
+  }
+  @keyframes fade-in {
+    0% {
+      /*-webkit-transform: translateY(50px);
+              transform: translateY(50px);*/
+      opacity: 0;
+    }
+    100% {
+      /*-webkit-transform: translateY(0);
+              transform: translateY(0);*/
+      opacity: 1;
+    }
+  }
+
+.fade-in
+{
+    animation: fade-in 2.4s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+    -webkit-animation: fade-in 2.4s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
 }
 
+.card {
+    width: calc(50% - 50px);;
+    margin: 10px 20px;
+    border: 5px solid #ccc;
+}
+
+.card:hover {
+    border: 5px solid #777;
+}
+
+.cardImage {
+    width: 100%;
+    height: auto;
+}
+  
 .close {
     border: none;
     padding: 10px;
@@ -31,8 +70,13 @@
 
 .tags-container {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 20px 300px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin: 20px 100px;
+}
+  
+@media only screen and (max-width: 480px) {
+.card {
+    width: calc(100% - 20px);
+}
 }
