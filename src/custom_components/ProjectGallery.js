@@ -63,9 +63,10 @@ useEffect(() => {
             'This is an example project item. You can sort through these using the tags. You can also click a tag to add it to the filter.',
           tags: [
             'Game',
-            'C++',
             'Unreal Engine', 
+            'C++',
           ],
+          imageStyle: 'cover',
         },
         {
           title: 'Portfolio Website',
@@ -78,18 +79,20 @@ useEffect(() => {
             'React', 
             'JavaScript'
           ],
+          imageStyle: 'contain',
         },
         {
-          title: 'Pop-it Box-it',
+          title: 'Pop It Box It',
           year: '2025',
-          link:'https://github.com/ph0nsy/LaMancha-Engine',
-          image: '',
+          link:'https://globalgamejam.org/games/2025/bubble-paper-shooter-fabrik-xtream-survival-and-what-hell-happening-real-popity-3',
+          image: 'https://ggjv4.s3.us-west-1.amazonaws.com/files/styles/sidebar_full/s3/games/2025/428876/team_picture/WhatsApp%20Image%202025-01-26%20at%2003.40.23.jpeg?VersionId=GUAI5cUx65vHn.O_UyD9D4n2nMdDkHuP&itok=cMfKKXij',
           description: 'A Weather App with React Native ',
           tags: [
             'Game Jam',
+            'Unity',
             'C#',
-            'Unity'
           ],
+          imageStyle: 'cover',
         },
         {
           title: 'Math Rails: Line Mapper',
@@ -99,9 +102,10 @@ useEffect(() => {
           description: 'A command-line Tic Tac Toe game written in Ruby',
           tags: [
             'Game', 
+            'Unity',
             'C#',
-            'Unity'
           ],
+          imageStyle: 'cover',
         },
         {
           title: 'Ticketing App',
@@ -114,6 +118,7 @@ useEffect(() => {
             'React', 
             'JavaScript'
           ],
+          imageStyle: 'cover',
         },
         {
           title: "It's not funny anymore",
@@ -123,9 +128,10 @@ useEffect(() => {
           description: 'A Weather App with React Native ',
           tags: [
             'Game Jam',
+            'Unity',
             'C#',
-            'Unity'
           ],
+          imageStyle: 'cover',
         },
         {
           title: "Shitpost Status",
@@ -138,6 +144,7 @@ useEffect(() => {
             'JavaScript',
             'Socket.io'
           ],
+          imageStyle: 'cover',
         },
         {
           title: 'AI & Dataminging Projects',
@@ -150,23 +157,25 @@ useEffect(() => {
             'Jupyter', 
             'Tensorflow'
           ],
+          imageStyle: 'contain',
         },
         {
           title: "Sprouts",
           year: '2023',
-          link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
-          image: '',
+          link:'https://github.com/ph0nsy/GGJ-2023',
+          image: 'https://raw.githubusercontent.com/ph0nsy/portfolio/refs/heads/main/src/assets/Sprouts.png',
           description: 'A Weather App with React Native ',
           tags: [
             'Game Jam',
             'Unity',
             'C#'
           ],
+          imageStyle: 'cover',
         },
         {
           title: "Vice Duo",
           year: '2022',
-          link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
+          link:'https://github.com/ph0nsy/GGJ-22',
           image: '',
           description: 'A Weather App with React Native',
           tags: [
@@ -174,17 +183,20 @@ useEffect(() => {
             'Unity',
             'C#'
           ],
+          imageStyle: 'cover',
         },
         {
           title: 'LaMancha Engine',
           year: 'Upcoming',
-          link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
+          link:'https://github.com/ph0nsy/LaMancha-Engine',
           image: 'https://raw.githubusercontent.com/ph0nsy/LaMancha-Engine/refs/heads/main/config/linux/icon_256.png',
           description: 'Full stack todo-list written in fullstack Javascript',
           tags: [
             'Game Engine',
             'C++',
+            'Lua',
           ],
+          imageStyle: 'contain',
         },
       ];
 
@@ -245,7 +257,7 @@ useEffect(() => {
         </div>
         {projects
         .filter((proj) => matchTags(proj.tags, tags))
-        .map(({ title, year, link, image, description, tags }) => {
+        .map(({ title, year, link, image, description, tags, imageStyle }) => {
             
             let colorType = null;
             
@@ -254,7 +266,7 @@ useEffect(() => {
                 colorType = typeColors.get(x);
               }
             }
-            
+
             {/*background : 'radial-gradient(ellipse at bottom, ' + colorType + ', transparent), radial-gradient(ellipse at top, #A716B0, transparent)',*/} 
             const linearGradient = { 
               background : 'radial-gradient(ellipse at bottom, #485696, transparent), radial-gradient(ellipse at top, #A716B0, transparent)',
@@ -268,7 +280,7 @@ useEffect(() => {
               <div key={`card-${title}`} className='card cursor-target' style={linearGradient}>
                 <a style={{ textDecoration:'none', color:'inherit', textdecoration:'small' }} target="_blank" href={link}>
                   <div style={{ width:'100%', display:'block', margin:'auto', paddingBottom:'10px', position:'relative' }}>
-                    <img className='cardImage' src={image} alt={'missing image'}/>
+                    <img className='cardImage' src={image} alt={'missing image'} style={{objectFit:imageStyle}}/>
                     <h1 style={{ margin:'5px 0px', textAlign:'center', width:'100%', fontVariant:'small-caps', fontSize:textSizeHeader }}>{title}</h1>
                     <h2 style={{ position:'absolute', margin:'5px', width:'20%', fontSize:'24px', top:'10px', left:'10px', textShadow:'2px 2px 6px #000000', fontVariant:'small-caps' }}>{year}</h2>
                     <p style={{ margin:'5px 0px', fontSize:textSizeDesc }}>{description}</p>
