@@ -2,6 +2,8 @@ import './App.css';
 
 import { useState, useEffect } from 'react';
 import { useMobile } from './hooks/useMobile';
+import { TagsProvider } from './hooks/useTagsContext';
+
 import ReactDOM from 'react-dom'
 
 //import { TooltipComponent } from '@syncfusion/ej2-react-popups';
@@ -15,20 +17,21 @@ import TargetCursor from './react_bits_components/TargetCursor';
 
 import { IoIosMail } from "react-icons/io";
 import { LiaHomeSolid, LiaArchiveSolid, LiaUserAltSolid, LiaGithub, LiaItchIo, LiaLinkedinIn, LiaMailBulkSolid, LiaMailchimp } from 'react-icons/lia';
-import { SiReact, SiUnrealengine, SiJavascript, SiCplusplus, SiGit, SiMysql, SiPython } from 'react-icons/si';
+import { SiReact, SiUnrealengine, SiJavascript, SiCplusplus, SiGit, SiMysql, SiPython, SiLua } from 'react-icons/si';
 import { BiLogoUnity } from 'react-icons/bi';
 import { TbBrandCSharp } from 'react-icons/tb';
 
 const techLogos = [
-  { node: <SiReact />,        title: "React",        href: "https://github.com/ph0nsy" },
-  { node: <SiUnrealengine />, title: "UnrealEngine", href: "https://github.com/ph0nsy" },
-  { node: <BiLogoUnity />,    title: "Unity",        href: "https://github.com/ph0nsy" },
-  { node: <SiJavascript />,   title: "JavaScript",   href: "https://github.com/ph0nsy" },
-  { node: <SiCplusplus />,    title: "C++",          href: "https://github.com/ph0nsy" },
-  { node: <TbBrandCSharp />,  title: "C#",           href: "https://github.com/ph0nsy" },
-  { node: <SiPython />,       title: "Pyhon",        href: "https://github.com/ph0nsy" },
-  { node: <SiMysql />,        title: "MySQL",        href: "https://github.com/ph0nsy" },
-  { node: <SiGit />,          title: "Git",          href: "https://github.com/ph0nsy" },
+  { node: <SiReact />,        title: "React",        href: "React" },
+  { node: <SiUnrealengine />, title: "UnrealEngine", href: "Unreal Engine" },
+  { node: <BiLogoUnity />,    title: "Unity",        href: "Unity" },
+  { node: <SiJavascript />,   title: "JavaScript",   href: "JavaScript" },
+  { node: <SiCplusplus />,    title: "C++",          href: "C++" },
+  { node: <TbBrandCSharp />,  title: "C#",           href: "C#" },
+  { node: <SiPython />,       title: "Pyhon",        href: "Python" },
+  { node: <SiMysql />,        title: "MySQL",        href: "MySQL" },
+  { node: <SiLua />,          title: "Lua",          href: "Lua" },
+  {/*{ node: <SiGit />,          title: "Git",          href: "Git" },*/}
 ];
 
 /*
@@ -46,6 +49,8 @@ function App() {
   const isMobile = useMobile().isMobile;
 
   return (
+    
+    <TagsProvider>
     <div className="App">
       {!isMobile && <TargetCursor 
         spinDuration={8}
@@ -69,7 +74,7 @@ function App() {
             ariaLabel="Technical Skills"
           />
         </div>
-        <ProjectGallery />
+          <ProjectGallery />
         {/*About + Contact (+ Portfolio link)*/} 
 
         {/*className=""*/}
@@ -83,7 +88,7 @@ function App() {
       <footer className="App-footer">
         <Navigation mobile={isMobile} />
         {!isMobile && 
-        <div style={{ position:'fixed', marginRight:'auto', marginLeft:'auto', bottom: '20px', left:'94%', transform:'translate(-50%, 0%)' }}>
+        <div style={{ position:'fixed', bottom: '20px', right:'5vw', width:'1vw', transform:'translate(-50%, 0%)' }}>
           <div style={{ display:'inline-block', margin:'10px', backgroundColor:'#000000', borderRadius:'50px', padding:'5px' }} className="cursor-target"><LiaGithub size={36} onClick={() => window.open("https://github.com/ph0nsy", "_self")} /></div>
           <div style={{ display:'inline-block', margin:'10px', backgroundColor:'#fa5c5c', borderRadius:'50px', padding:'5px' }} className="cursor-target"><LiaItchIo size={36} onClick={() => window.open("https://ph0nsy.itch.io", "_self")} /></div>
           <div style={{ display:'inline-block', margin:'10px', backgroundColor:'#0a66c2', borderRadius:'50px', padding:'5px' }} className="cursor-target"><LiaLinkedinIn size={36} onClick={() => window.open("https://www.linkedin.com/in/ph0nsy", "_self")} /></div>
@@ -91,6 +96,7 @@ function App() {
         </div>}
       </footer>
     </div>
+    </TagsProvider>
   );
 }
 

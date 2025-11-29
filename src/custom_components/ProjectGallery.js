@@ -1,57 +1,50 @@
 import './ProjectGallery.css'
-import { useState, useCallback, useId } from 'react';
-/*
-const inViewport = (entries, observer) => {
-  entries.forEach(entry => {
-    console.log(entry);
-    const classes = entry.target.classList;
-    if ([...classes].includes("fade-in")) {
-      entry.target.classList.remove("fade-in");
-    }
-    else {
-      entry.target.classList.add("fade-in");
-    }
-  });
-};
-
-const Obs = new IntersectionObserver(inViewport);
-const obsOptions = {}; 
-
-Array.from(document.getElementsByClassName('card')).forEach(element => {
-  console.log(element);
-  Obs.observe(element, obsOptions);
-  console.log(element);
-});
-
-*/
-document.addEventListener("DOMContentLoaded", function(event) {
-  document.addEventListener("scroll", function(event) {
-      const cards = document.getElementsByClassName("card");
-      const windowOffsetTop = window.innerHeight + window.scrollY;
-      console.log('WinOffset - ' + windowOffsetTop);
-
-      Array.prototype.forEach.call(cards, (card) => {       
-        console.log(card);  
-        const classesArray = card.classList;
-          if (windowOffsetTop >= card.offsetTop) {
-            if (![...classesArray].includes("fade-in")) {
-              card.classList.add("fade-in");
-              console.log(card.key + ' [ADD] - ' + card.className);
-
-            }
-          }
-          else if([...classesArray].includes("fade-in")){
-            console.log(card.key + ' [REMOVE] - ' + card.className);
-            card.classList.remove("fade-in");
-          }
-      });
-  });
-});
+import { useEffect } from 'react';
+import { useTags } from '../hooks/useTagsContext';
 
 function ProjectGallery(){
-    const [tags, setTags] = useState([]);
-    const id = useId();
-    
+  
+    const { tags, addTag, deleteTag, removeAll } = useTags();
+  
+useEffect(() => {
+  let scheduled = false;
+
+  const handleScroll = () => {
+    if (scheduled) return;
+    scheduled = true;
+
+    requestAnimationFrame(() => {
+      const cards = document.getElementsByClassName('card');
+      const viewportHeight = window.innerHeight;
+
+      Array.from(cards).forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const isVisible = rect.top < viewportHeight && rect.bottom > 0;
+
+        if (isVisible) {
+          card.classList.add('fade-in');
+        } else {
+          card.classList.remove('fade-in');
+        }
+      });
+
+      scheduled = false;
+    });
+  };
+
+  // initial check
+  handleScroll();
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('resize', handleScroll);
+
+  return () => {
+    window.removeEventListener('scroll', handleScroll);
+    window.removeEventListener('resize', handleScroll);
+  };
+}, []);
+
+
+
     const typeColors = new Map([
       ["Game", '#CF2376'],
       ["Game Jam", '#BF2A2A'],
@@ -60,117 +53,102 @@ function ProjectGallery(){
       ["Python", '#F7E00C'],
     ]);
 
-    const sourceColors = new Map([
-      ["Bachelor's Degree", '#044BBD'],
-      ["Master's Degree", '#00B7FF'],
-      ["Internship", '#00B7FF'],
-      ["Upcoming", '#EEAECA']
-    ])
-
     const projects = [
         {
           title: 'Lady Umbrella',
           link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
           year: '2025',
-          image: 'https://raw.githubusercontent.com/ph0nsy/portfolio/refs/heads/main/src/assets/LadyUmbrella.jpg',
+          image: 'https://raw.githubusercontent.com/ph0nsy/portfolio/refs/heads/main/src/assets/LadyUmbrella.png',
           description:
             'This is an example project item. You can sort through these using the tags. You can also click a tag to add it to the filter.',
           tags: [
             'Game',
+            'C++',
             'Unreal Engine', 
-            'C++', 
-            "Master's Degree"
           ],
         },
         {
           title: 'Portfolio Website',
           year: '2025',
-          link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
-          image: '',
+          link:'https://github.com/ph0nsy/portfolio',
+          image: 'https://raw.githubusercontent.com/ph0nsy/portfolio/refs/heads/main/src/assets/GitHub_Logo_White.png',
           description: 'React implementation of the game of life.',
           tags: [
             'Web', 
             'React', 
-            'JavaScript', 
-            'Front-end'
+            'JavaScript'
           ],
         },
         {
           title: 'Pop-it Box-it',
           year: '2025',
-          link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
+          link:'https://github.com/ph0nsy/LaMancha-Engine',
           image: '',
           description: 'A Weather App with React Native ',
           tags: [
             'Game Jam',
-            'Unity',
-            'C#'
+            'C#',
+            'Unity'
           ],
         },
         {
           title: 'Math Rails: Line Mapper',
           year: '2025',
-          link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
-          image: '',
+          link:'https://ph0nsy.itch.io/math-rails-line-mapper',
+          image: 'https://img.itch.zone/aW1nLzE4MjA3OTgyLnBuZw==/original/atW7sn.png',
           description: 'A command-line Tic Tac Toe game written in Ruby',
           tags: [
             'Game', 
-            'Unity',
-            'C#', 
-            "Bachelor's Degree"
+            'C#',
+            'Unity'
           ],
         },
         {
           title: 'Ticketing App',
           year: '2024',
-          link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
-          image: '',
+          link:'https://www.improntasoluciones.com/en',
+          image: 'https://cdn.janto.es/pro/webImpronta23/img/20231018123300_1697625180.682Impronta.jpg',
           description: 'Calculator written in Javascript',
           tags: [
             'Web', 
             'React', 
-            'JavaScript', 
-            'Front-end',
-            'Internship'
+            'JavaScript'
           ],
         },
         {
           title: "It's not funny anymore",
           year: '2024',
-          link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
-          image: '',
+          link:'https://ph0nsy.itch.io/its-not-funny-anymore',
+          image: 'https://img.itch.zone/aW1hZ2UvMjUzNzM2OC8xNTA5NTkzNC5qcGVn/original/jH0VJ9.jpeg',
           description: 'A Weather App with React Native ',
           tags: [
             'Game Jam',
-            'Unity',
             'C#',
+            'Unity'
           ],
         },
         {
           title: "Shitpost Status",
           year: '2023',
-          link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
-          image: '',
+          link:'https://ph0nsy.itch.io/shitpost-status',
+          image: 'https://img.itch.zone/aW1hZ2UvMjIyMDQ5Ny8xMzU3MzIyOS5wbmc=/original/7Kzupq.png',
           description: 'A Weather App with React Native ',
           tags: [
             'Game', 
             'JavaScript',
-            'Phaser 3',
-            'Socket.io',
-            "Bachelor's Degree"
+            'Socket.io'
           ],
         },
         {
           title: 'AI & Dataminging Projects',
           year: '2023',
           link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
-          image: '',
+          image: 'https://raw.githubusercontent.com/ph0nsy/portfolio/refs/heads/main/src/assets/GitHub_Logo_White.png',
           description: 'Calculator written in Javascript',
           tags: [
             'Python', 
             'Jupyter', 
-            'Tensorflow', 
-            "Bachelor's Degree"
+            'Tensorflow'
           ],
         },
         {
@@ -190,7 +168,7 @@ function ProjectGallery(){
           year: '2022',
           link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
           image: '',
-          description: 'A Weather App with React Native ',
+          description: 'A Weather App with React Native',
           tags: [
             'Game Jam',
             'Unity',
@@ -201,45 +179,62 @@ function ProjectGallery(){
           title: 'LaMancha Engine',
           year: 'Upcoming',
           link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
-          image: '',
+          image: 'https://raw.githubusercontent.com/ph0nsy/LaMancha-Engine/refs/heads/main/config/linux/icon_256.png',
           description: 'Full stack todo-list written in fullstack Javascript',
           tags: [
             'Game Engine',
             'C++',
-            'Upcoming'
           ],
         },
       ];
 
-    const addTag = useCallback(
-        (tag) => () => {
-            if (!tags.includes(tag)) { return setTags((prevTags) => [...prevTags, tag]); }
-        },
-        [tags]
-    );
-    
-    const deleteTag = useCallback(
-        (tagId) => () => {
-            const tagsFiltered = tags.filter((tag) => { return tag !== tagId; });
-            setTags(tagsFiltered);
-        },
-        [tags]
-    );
-
     const matchTags = (current, target) => {
         return target.every((tag) => current.includes(tag));
     };
+  // Scroll -> add/remove fade-in class on .card elements.
+  // Use requestAnimationFrame to throttle DOM updates and cleanup on unmount.
+  useEffect(() => {
+    let scheduled = false;
+
+    const handleScroll = () => {
+      if (scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(() => {
+        const cards = document.getElementsByClassName('card');
+        const windowOffsetTop = window.innerHeight + window.scrollY;
+        Array.prototype.forEach.call(cards, (card) => {
+          const classesArray = card.classList;
+          if (windowOffsetTop >= card.offsetTop) {
+            if (![...classesArray].includes('fade-in')) {
+              card.classList.add('fade-in');
+            }
+          } else if ([...classesArray].includes('fade-in')) {
+            card.classList.remove('fade-in');
+          }
+        });
+        scheduled = false;
+      });
+    };
+
+    // immediate check + attach
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []); // no dependencies: this effect deals with DOM only
 
     return (
     <div className='tags-container'>
-        <div style={{ width:'100%' }}>
+        <div style={{ width:'100%', gap:'8px' }}>
         {tags.length > 0
             ? tags.map((tag) => {
                 return (
                 <button
-                    key={`close-button-${id}`}
+                    key={`close-button-${tag}`}
                     className='close cursor-target'
-                    onClick={deleteTag(tag)}
+                    onClick={() => { deleteTag(tag) }}
                     style = {{ margin:'15px 0px' }}
                 >
                     {tag} &nbsp; x
@@ -253,49 +248,47 @@ function ProjectGallery(){
         .map(({ title, year, link, image, description, tags }) => {
             
             let colorType = null;
-            let colorSource = null;
             
             for (const x of tags) {
               if (colorType == null && [...typeColors.keys()].includes(x)) {
                 colorType = typeColors.get(x);
               }
-              if (colorSource == null && [...sourceColors.keys()].includes(x)) {
-                colorSource = sourceColors.get(x);
-              }
             }
-
-            if (colorSource == null) colorSource = colorType;
             
+            {/*background : 'radial-gradient(ellipse at bottom, ' + colorType + ', transparent), radial-gradient(ellipse at top, #A716B0, transparent)',*/} 
             const linearGradient = { 
-              background : 'radial-gradient(ellipse at top, ' + colorType + ', transparent), radial-gradient(ellipse at bottom, ' + colorSource + ', transparent)', 
+              background : 'radial-gradient(ellipse at bottom, #485696, transparent), radial-gradient(ellipse at top, #A716B0, transparent)',
              }
 
-
-            let widthHeader = window.innerWidth > 764 ? '70%' : '100%';
-            let alignmentHeader = window.innerWidth > 764 ? 'center' : 'left';
+            let textSizeHeader = window.innerWidth > 764 ? '32px' : '24px';
+            let textSizeDesc = window.innerWidth > 764 ? '18px' : '14px';
+            let textSizeTag = window.innerWidth > 764 ? '12px' : '12px';
 
             return (
-              <div key={`card-${id}`} className='card cursor-target' style={linearGradient}>
+              <div key={`card-${title}`} className='card cursor-target' style={linearGradient}>
                 <a style={{ textDecoration:'none', color:'inherit', textdecoration:'small' }} target="_blank" href={link}>
-                  <img className='cardImage' src={image} alt={'missing image'}/>
-                  <div style={{ width:'90%', display:'block', margin:'auto'}}>
-                    <h1 style={{ display:'inline-block', textAlign:{alignmentHeader}, width:{widthHeader} }}>{title}</h1>
-                    {window.innerWidth > 764 && <h2 style={{ display:'inline-block', textAlign:'right', width:'20%' }}>{year}</h2>}
-                    <p>{description}</p>
-                  </div>                  
+                  <div style={{ width:'100%', display:'block', margin:'auto', paddingBottom:'10px', position:'relative' }}>
+                    <img className='cardImage' src={image} alt={'missing image'}/>
+                    <h1 style={{ margin:'5px 0px', textAlign:'center', width:'100%', fontVariant:'small-caps', fontSize:textSizeHeader }}>{title}</h1>
+                    <h2 style={{ position:'absolute', margin:'5px', width:'20%', fontSize:'24px', top:'10px', left:'10px', textShadow:'2px 2px 6px #000000', fontVariant:'small-caps' }}>{year}</h2>
+                    <p style={{ margin:'5px 0px', fontSize:textSizeDesc }}>{description}</p>
+                  </div>            
                 </a>
-                  {tags.map((tag) => {
-                  return (
-                      <button
-                      key={`add-button-${id}`}
-                      type='button'
-                      className='tag-button cursor-target'
-                      onClick={addTag(tag)}
-                      >
-                      {tag}
-                      </button>
-                  );
-                  })}
+                  <div style={{ position:'absolute', top:'10px', right:'10px', display:'flex', width:'30%', justifyContent:'flex-start', flexDirection:'row', flexWrap: 'wrap', alignItems:'stretch' }}>   
+                    {tags.map((tag) => {  
+                    return (
+                        <button
+                        key={`add-button-${tag}`}
+                        type='button'
+                        className='tag-button cursor-target'
+                        onClick={() => { addTag(tag) }}
+                        style={{ fontSize:textSizeTag }}
+                        >
+                        {tag}
+                        </button>
+                    );
+                    })}  
+                  </div> 
               </div>
             );
         })}
