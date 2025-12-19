@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=BBH+Bartle&display=swap');
+
+.marquee {
+    position: relative;
+    overflow: hidden;
+    margin: 1vh 0 5vh 0;
+    --offset: 20vw;
+    --move-initial: calc(-25% + var(--offset));
+    --move-final: calc(-50% + var(--offset));
+}
+
+.marquee__inner {
+    width: fit-content;
+    display: flex;
+    position: relative;
+    transform: translate3d(var(--move-initial), 0, 0);
+    animation: marquee 5s linear infinite;
+    animation-play-state: running;
+}
+
+
+.marquee__inner_inv {
+    width: fit-content;
+    display: flex;
+    position: relative;
+    transform: translate3d(var(--move-final), 0, 0);
+    animation: marquee_inv 5s linear infinite;
+    animation-play-state: running;
+}
+
+.marquee span {
+    color: white;
+    white-space: nowrap;
+    padding: 0 0 0 2vw;
+    font-family: "BBH Bartle", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-variant: small-caps;
+
+    display: inline-block;
+    position: relative;
+    text-align: center;
+
+    &:not(:last-child)::after {
+        width: 2vw;
+        content: " · ";
+        text-align: right;
+    }
+
+}
+
+.marquee:hover .marquee__inner {
+    animation-play-state: paused;
+}
+
+.marquee:hover .marquee__inner_inv {
+    animation-play-state: paused;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translate3d(var(--move-initial), 0, 0);
+    }
+
+    100% {
+        transform: translate3d(var(--move-final), 0, 0);
+    }
+}
+
+@keyframes marquee_inv {
+    0% {
+        transform: translate3d(var(--move-final), 0, 0);
+    }
+
+    100% {
+        transform: translate3d(var(--move-initial), 0, 0);
+    }
+}

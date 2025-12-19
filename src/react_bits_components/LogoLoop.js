@@ -200,7 +200,7 @@ export const LogoLoop = memo(
     const cssVariables = useMemo(
       () => ({
         '--logoloop-gap': `${gap}px`,
-        '--logoloop-logoHeight': `${logoHeight}px`,
+        '--logoloop-logoHeight': `${logoHeight}vw`,
         ...(fadeOutColor && { '--logoloop-fadeColor': fadeOutColor })
       }),
       [gap, logoHeight, fadeOutColor]
@@ -260,8 +260,8 @@ export const LogoLoop = memo(
           <a
             className="logoloop__link cursor-target"
             onClick={() => {
-              if (item.href !== "") addTag(item.href);
-              else removeAll();
+              /*if (item.href !== "") addTag(item.href);
+              else removeAll();*/
             }}
             aria-label={itemAriaLabel || 'logo link'}
             target="_blank"

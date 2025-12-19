@@ -2,7 +2,7 @@ import './ProjectGallery.css'
 import { useEffect } from 'react';
 import { useTags } from '../hooks/useTagsContext';
 
-function ProjectGallery(){
+function ProjectGallery({ title = 'Projects' }){
   
     const { tags, addTag, deleteTag, removeAll } = useTags();
   
@@ -58,9 +58,9 @@ useEffect(() => {
           title: 'Lady Umbrella',
           link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
           year: '2025',
-          image: 'https://raw.githubusercontent.com/ph0nsy/portfolio/refs/heads/main/src/assets/LadyUmbrella.png',
+          image: './assets/LadyUmbrella.png',
           description:
-            'This is an example project item. You can sort through these using the tags. You can also click a tag to add it to the filter.',
+            "Master's final project developed in Unreal Engine 5.5. I worked on a custom third-person camera system, UI menus (design & implementation), and performance optimization, collaborating within a multidisciplinary team of ~40 developers.",
           tags: [
             'Game',
             'Unreal Engine', 
@@ -72,21 +72,21 @@ useEffect(() => {
           title: 'Portfolio Website',
           year: '2025',
           link:'https://github.com/ph0nsy/portfolio',
-          image: 'https://raw.githubusercontent.com/ph0nsy/portfolio/refs/heads/main/src/assets/GitHub_Logo_White.png',
-          description: 'React implementation of the game of life.',
+          image: './assets/Portfolio.png',
+          description: 'Personal portfolio built with React, using React Bits and custom components. Designed as an expandable platform to showcase projects and document ongoing work.',
           tags: [
             'Web', 
             'React', 
             'JavaScript'
           ],
-          imageStyle: 'contain',
+          imageStyle: 'cover',
         },
         {
           title: 'Pop It Box It',
           year: '2025',
           link:'https://globalgamejam.org/games/2025/bubble-paper-shooter-fabrik-xtream-survival-and-what-hell-happening-real-popity-3',
           image: 'https://ggjv4.s3.us-west-1.amazonaws.com/files/styles/sidebar_full/s3/games/2025/428876/team_picture/WhatsApp%20Image%202025-01-26%20at%2003.40.23.jpeg?VersionId=GUAI5cUx65vHn.O_UyD9D4n2nMdDkHuP&itok=cMfKKXij',
-          description: 'A Weather App with React Native ',
+          description: 'Global Game Jam 2025 project developed in Unity with a team of 7 under the theme “Bubbles”. Rapidly prototyped the main gameplay around the theme, focused on speed, team coordination and scope managing.',
           tags: [
             'Game Jam',
             'Unity',
@@ -95,11 +95,11 @@ useEffect(() => {
           imageStyle: 'cover',
         },
         {
-          title: 'Math Rails: Line Mapper',
+          title: 'Math Rails Line-Mapper',
           year: '2025',
           link:'https://ph0nsy.itch.io/math-rails-line-mapper',
-          image: 'https://img.itch.zone/aW1nLzE4MjA3OTgyLnBuZw==/original/atW7sn.png',
-          description: 'A command-line Tic Tac Toe game written in Ruby',
+          image: './assets/MathRailsLineMapper.png',
+          description: 'Proof of concept for an educational game focused on teaching mathematical function visualization. Developed in Unity as part of my Computer Science degree, exploring gameplay-driven learning mechanics.',
           tags: [
             'Game', 
             'Unity',
@@ -112,7 +112,7 @@ useEffect(() => {
           year: '2024',
           link:'https://www.improntasoluciones.com/en',
           image: 'https://cdn.janto.es/pro/webImpronta23/img/20231018123300_1697625180.682Impronta.jpg',
-          description: 'Calculator written in Javascript',
+          description: 'Frontend developer internship at Impronta Soluciones. Worked in a small team to build and maintain a React-based ticketing application, focusing on UI implementation and usability.',
           tags: [
             'Web', 
             'React', 
@@ -125,7 +125,7 @@ useEffect(() => {
           year: '2024',
           link:'https://ph0nsy.itch.io/its-not-funny-anymore',
           image: 'https://img.itch.zone/aW1hZ2UvMjUzNzM2OC8xNTA5NTkzNC5qcGVn/original/jH0VJ9.jpeg',
-          description: 'A Weather App with React Native ',
+          description: 'Game jam project developed in Unity with a team of 10 under the theme “Make Me Laugh”. Contributed to gameplay implementation, importing 3D models into the project and rapid iteration.',
           tags: [
             'Game Jam',
             'Unity',
@@ -138,7 +138,7 @@ useEffect(() => {
           year: '2023',
           link:'https://ph0nsy.itch.io/shitpost-status',
           image: 'https://img.itch.zone/aW1hZ2UvMjIyMDQ5Ny8xMzU3MzIyOS5wbmc=/original/7Kzupq.png',
-          description: 'A Weather App with React Native ',
+          description: 'Multiplayer browser card game hosted on itch.io and Vercel developed as a Computer Science project using Phaser 3 and Socket.io for client-server communication.',
           tags: [
             'Game', 
             'JavaScript',
@@ -150,8 +150,8 @@ useEffect(() => {
           title: 'AI & Dataminging Projects',
           year: '2023',
           link:'https://store.steampowered.com/app/3956890/Lady_Umbrella/',
-          image: 'https://raw.githubusercontent.com/ph0nsy/portfolio/refs/heads/main/src/assets/GitHub_Logo_White.png',
-          description: 'Calculator written in Javascript',
+          image: './assets/GitHub_Logo_White.png',
+          description: 'Collection of Python-based projects based on machine learning and data analysis, developed during for Computer Science degree using tools like Jupyter and TensorFlow.',
           tags: [
             'Python', 
             'Jupyter', 
@@ -163,8 +163,8 @@ useEffect(() => {
           title: "Sprouts",
           year: '2023',
           link:'https://github.com/ph0nsy/GGJ-2023',
-          image: 'https://raw.githubusercontent.com/ph0nsy/portfolio/refs/heads/main/src/assets/Sprouts.png',
-          description: 'A Weather App with React Native ',
+          image: './assets/Sprouts.png',
+          description: 'Global Game Jam 2023 project developed in Unity with a team of 10, based on the theme “Roots”. Helped novice Unity developers during the game creation.',
           tags: [
             'Game Jam',
             'Unity',
@@ -176,8 +176,8 @@ useEffect(() => {
           title: "Vice Duo",
           year: '2022',
           link:'https://github.com/ph0nsy/GGJ-22',
-          image: '',
-          description: 'A Weather App with React Native',
+          image: 'https://raw.githubusercontent.com/ph0nsy/GGJ-22/refs/heads/main/Assets/Sprites/Menu/bakgroundMainMenu.png',
+          description: 'Game jam project developed in Unity with a team of 5 under the theme “Duality”. Explored local 2 player controls and mechanics.',
           tags: [
             'Game Jam',
             'Unity',
@@ -189,14 +189,14 @@ useEffect(() => {
           title: 'LaMancha Engine',
           year: 'Upcoming',
           link:'https://github.com/ph0nsy/LaMancha-Engine',
-          image: 'https://raw.githubusercontent.com/ph0nsy/LaMancha-Engine/refs/heads/main/config/linux/icon_256.png',
-          description: 'Full stack todo-list written in fullstack Javascript',
+          image: './assets/LaMancha_Github_Repo_Logo.png',
+          description: 'Lightweight 2D game engine written in C/C++, currently under development. Targeted at low-end platforms (including R36S), with scripting support via Lua and a focus on simplicity and performance.',
           tags: [
             'Game Engine',
             'C++',
             'Lua',
           ],
-          imageStyle: 'contain',
+          imageStyle: 'cover',
         },
       ];
 
@@ -238,14 +238,16 @@ useEffect(() => {
   }, []); // no dependencies: this effect deals with DOM only
 
     return (
-    <div className='tags-container'>
-        <div style={{ width:'100%', gap:'8px' }}>
+    <div style={{ width:'100%', background: 'url(./assets/LU_RenderCity.png) no-repeat center', backgroundSize: 'cover' }}>
+    <h1 className='rubik-mono-one-regular'>{title}</h1>
+    <div className='tags-container' style={{ backdropFilter: 'grayscale(1%) blur(10px) brightness(90%)' }}>
+        <div style={{ width:'100%', gap:'8px', minHeight:'5vh', margin:'1.5vh 10vw', backdropFilter: 'none', border: 'solid 0.5rem', borderRadius: '24px' }}>
         {tags.length > 0
             ? tags.map((tag) => {
                 return (
                 <button
                     key={`close-button-${tag}`}
-                    className='close cursor-target'
+                    className='close cursor-target bungee-regular'
                     onClick={() => { deleteTag(tag) }}
                     style = {{ margin:'15px 0px' }}
                 >
@@ -272,18 +274,18 @@ useEffect(() => {
               background : 'radial-gradient(ellipse at bottom, #485696, transparent), radial-gradient(ellipse at top, #A716B0, transparent)',
              }
 
-            let textSizeHeader = window.innerWidth > 764 ? '32px' : '24px';
-            let textSizeDesc = window.innerWidth > 764 ? '18px' : '14px';
-            let textSizeTag = window.innerWidth > 764 ? '12px' : '12px';
+            let textSizeHeader = window.innerWidth > 764 ? '28px' : '24px';
+            let textSizeDesc = window.innerWidth > 764 ? '16px' : '16px';
+            let textSizeTag = window.innerWidth > 764 ? '14px' : '16px';
 
             return (
               <div key={`card-${title}`} className='card cursor-target' style={linearGradient}>
                 <a style={{ textDecoration:'none', color:'inherit', textdecoration:'small' }} target="_blank" href={link}>
                   <div style={{ width:'100%', display:'block', margin:'auto', paddingBottom:'10px', position:'relative' }}>
                     <img className='cardImage' src={image} alt={'missing image'} style={{objectFit:imageStyle}}/>
-                    <h1 style={{ margin:'5px 0px', textAlign:'center', width:'100%', fontVariant:'small-caps', fontSize:textSizeHeader }}>{title}</h1>
-                    <h2 style={{ position:'absolute', margin:'5px', width:'20%', fontSize:'24px', top:'10px', left:'10px', textShadow:'2px 2px 6px #000000', fontVariant:'small-caps' }}>{year}</h2>
-                    <p style={{ margin:'5px 0px', fontSize:textSizeDesc }}>{description}</p>
+                    <h1 style={{ margin:'0px 3px', textAlign:'center', width:'100%', fontVariant:'small-caps', fontSize:textSizeHeader }}>{title}</h1>
+                    <h2 style={{ position:'absolute', margin:'5px', width:'20%', fontSize:'32px', top:'10px', left:'10px', textShadow:'2px 2px 6px #000000', fontVariant:'small-caps' }}>{year}</h2>
+                    <p style={{ margin:'5px 10px', fontSize:textSizeDesc }}>{description}</p>
                   </div>            
                 </a>
                   <div style={{ position:'absolute', top:'10px', right:'10px', display:'flex', width:'30%', justifyContent:'flex-start', flexDirection:'row', flexWrap: 'wrap', alignItems:'stretch' }}>   
@@ -292,7 +294,7 @@ useEffect(() => {
                         <button
                         key={`add-button-${tag}`}
                         type='button'
-                        className='tag-button cursor-target'
+                        className='tag-button bungee-regular cursor-target'
                         onClick={() => { addTag(tag) }}
                         style={{ fontSize:textSizeTag }}
                         >
@@ -304,7 +306,8 @@ useEffect(() => {
               </div>
             );
         })}
-    </div>);
+    </div>
+  </div>);
     
 }
 
