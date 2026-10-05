@@ -331,7 +331,7 @@ That's the physical base address. The relevant register offsets within that bank
 
 ## Reading the register
 
-With the address in hand, we can now do `ioremap()` plus `readl()`. Physical addresses aren't directly usable by pointers, `ioremap(phys_addr, size)` asks the kernel to set up a virtual mapping for a specific physical range, returning a `void __iomem *`, a pointer type that prevents it being dereferenced like normal memory. `readl()` is the correct accessor, it handles the ordering and caching semantics memory-mapped I/O needs that plain memory doesn't. With this, our ***C*** driver code becomes:
+With the address in hand, we can now do `ioremap()` plus `readl()`. We can't really use physical addresses directly with a pointer, we instead use `ioremap(phys_addr, size)` to ask the kernel to set up a virtual mapping for a specific physical range, returning a `void __iomem *`, a pointer type that prevents it being dereferenced like normal memory. `readl()` is the correct accessor, it handles the ordering and caching semantics memory-mapped I/O needs that plain memory doesn't. With this, our ***C*** driver code becomes:
 
 ```C
 #include <linux/module.h>
@@ -465,18 +465,6 @@ Now it's all about building the final 20 button bitmask and flipping raw value s
 >
 > What we should have done is fixed-point integers (an int16_t representing a scaled range, with the true value 
 > computed as raw / 32768.0 in userspace, where floats are free to use). 
-
-## Beware of Bugs!
-
-Now that we have the whole code after a few small edits, there are a couple of bugs I came into along the way that may be useful in pointing out the value of reviewing our code:
- 
-- **Resource leak on `module_exit`**. The function didn't call `iounmap()` on all three mapped GPIO banks; which means every unload came with a silent memory leak. Repeated load/unload cycles can exhaust the memory pool; however, this isn't something we could notice in a short testing session.
-- **Needed size validation before `copy_to_user`**. `read()` copied a fixed-size struct into the caller's buffer regardless of how many bytes the caller actually asked for or allocated; which means a small buffer could be ignored and a larger struct would be written, leading to buffer overflow. Fixed adding `if (count < sizeof(state)) { return -EINVAL; }` before the copy.
- 
-**Three smaller bugs.** 
-- `%d` used to print an unsigned register value, harmless for most readings, but would print a negative number if the register's high bit were ever set, misleading in exactly the moment someone's debugging a real reading (`%u` is correct). 
-- `state |= ...` instead of `state.buttons |= ...`, a struct has no bitwise OR of its own, only its members do, a fast, loud compile failure, but an easy slip once a single-field driver grows a struct with more fields. 
-- Forgot to zero initialize our bitmask, which risks showing pressed bits where there are none from garbage unitizialized memory; because bits are only ever set via `|=` and never cleared. 
 
 ## The analog sticks problem
 
