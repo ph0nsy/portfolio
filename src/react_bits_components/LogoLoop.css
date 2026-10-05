@@ -29,6 +29,16 @@
   user-select: none;
   position: relative;
   z-index: 0;
+  overflow-x: hidden;  
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-secondary) transparent;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 4rem,
+    #000 calc(100% - 4rem),
+    transparent
+  );
 }
 
 .logoloop--vertical .logoloop__track {
@@ -52,7 +62,7 @@
   margin-right: var(--logoloop-gap);
   font-size: var(--logoloop-logoHeight);
   line-height: 1;
-  filter: drop-shadow(0 0 0.9rem rgb(220 180 255));
+  filter: drop-shadow(0 0 0.9rem rgb(0 0 0));
 }
 
 .logoloop__item::marker {
@@ -130,6 +140,7 @@
   width: clamp(24px, 8%, 120px);
   pointer-events: none;
   z-index: 10;
+  padding: 0 10px;
 }
 
 .logoloop--fade::before {

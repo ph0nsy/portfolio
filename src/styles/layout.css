@@ -1,0 +1,68 @@
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 200;
+  padding: 0.5rem 1rem;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}
+
+.site-main {
+  background: var(--color-bg);
+}
+
+/* Footer */
+.site-footer {
+  display: grid;
+  justify-items: center;
+  gap: 1.5rem;
+  padding: 2rem var(--page-gutter) 2rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-top: 1px solid var(--color-border);
+}
+.site-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+.site-footer__link {
+  color: inherit;
+  font-variant: small-caps;
+}
+.site-footer__copy {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.socials {
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.socials__item {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--social-color);
+  color: var(--white);
+  border: 1px solid var(--color-border);
+}
+
+/* On mobile the navbar sits at the bottom; keep the footer text clear of it. */
+@media (max-width: 768px) {
+  .site-footer {
+    padding-bottom: 7rem;
+  }
+}

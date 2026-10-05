@@ -1,0 +1,87 @@
+:root {
+  /* 1. Palette */
+
+  /* Brand hues, taken from the hero (LetterGlitch and GradientText). */
+  --pink-500: #ee0b5c;     /* 4.84 on black, 4.34 on white */
+  --pink-300: #ff4d8d;     /* 6.70 on black, for pink TEXT on dark backgrounds */
+  --magenta-500: #a716b0;  /* 3.38 on black (shapes only), 6.20 under white text */
+  --indigo-500: #414c7d;   /* 3.05 on black (shapes only), used for depth in gradients */
+
+  /* Neutrals */
+  --black: #000000;
+  --night-900: #0e0a14;    /* near black with a hint of violet, for raised surfaces */
+  --night-700: #221a2b;    /* borders and dividers on dark */
+  --grey-500: #8f8f8f;     /* 6.49 on black */
+  --grey-300: #cfcfcf;     /* 13.48 on black */
+  --grey-600: #555555;     /* 7.46 on white */
+  --grey-200: #d0d0d0;
+  --white: #ffffff;
+  --off-white: #f2eff5;    /* 18.44 on black, softer than pure white for long text */
+
+  /* 2. Roles */
+
+  /* Surfaces */
+  --color-bg: var(--black);              /* page background (the hero fades into it) */
+  --color-surface: var(--night-900);     /* bars, inputs, code blocks */
+  --color-border: var(--night-700);
+  --color-paper: var(--white);           /* light sections: About, post cards */
+  --color-paper-border: var(--grey-200);
+
+  /* Text */
+  --color-text: var(--off-white);        /* on --color-bg */
+  --color-text-soft: var(--grey-300);    /* secondary text on dark */
+  --color-text-muted: var(--grey-500);   /* hints, metadata on dark */
+  --color-ink: var(--black);             /* text on --color-paper */
+  --color-ink-soft: var(--grey-600);     /* metadata on --color-paper */
+
+  /* Brand accents */
+  --color-primary: var(--pink-500);      /* the one hot color: cursor, active, CTAs */
+  --color-on-primary: var(--black);      /* text on a pink fill: 4.84. White would be 4.34, just under AA */
+  --color-primary-text: var(--pink-300); /* pink used as text on dark: links, headings */
+  --color-secondary: var(--magenta-500); /* fills and borders: pressed tags, navbar */
+  --color-on-secondary: var(--white);    /* 6.20 */
+  --color-depth: var(--indigo-500);      /* gradients and glows, never text */
+
+  /* Focus ring: must stay visible on dark, on white and next to pink fills. */
+  --color-focus: var(--pink-300);        /* 6.70 on black, 3.14 on white */
+
+  /* Signature gradient: the old card background, now the default "empty frame". */
+  --gradient-frame:
+    radial-gradient(ellipse at bottom, var(--color-depth), transparent),
+    radial-gradient(ellipse at top, var(--color-secondary), transparent),
+    var(--color-surface);
+
+  /* 3. Typography */
+
+  /* Neutral body and two display faces: one for titles, one for small HUD labels. */
+  --font-display: 'Rubik Mono One', 'Courier New', monospace;  /* page titles, marquees */
+  --font-hud: 'Bungee', 'Arial Black', sans-serif;             /* years, counters, tags */
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* 4. Shapes */
+
+  /* The slant is the site's signature shape (hero wedge, About cuts, panels). */
+  --slant-sm: 24px;
+  --slant-md: 40px;
+  --slant-lg: 70px;
+  --radius-sm: 0.5em;
+  --radius-pill: 999px;
+  --shadow-hard: 10px 10px 5px var(--black);  /* the navbar's offset shadow */
+
+  /* 5. Motion */
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-fast: 0.2s;
+  --duration-base: 0.35s;
+  --duration-slow: 0.5s;
+
+  /* 6. Layout */
+
+  --nav-height: 105px;  /* 20px offset + floating navbar height */
+  --page-gutter: clamp(1rem, 6vw, 6rem);
+}
+
+/* On mobile the navbar is docked at the bottom, so nothing is covered at the top. */
+@media (max-width: 768px) {
+  :root { --nav-height: 1rem; }
+}

@@ -1,0 +1,79 @@
+.Navbar-container {
+  --nav-alpha: 0.35;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 100;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  border-radius: 2rem;
+  /* Transparency lives in the background colors, not in `opacity`; which would fade the whole element (links included). */
+  background-color: color-mix( in srgb, var(--color-secondary) calc(var(--nav-alpha) * 100%), transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 10px 10px 5px
+    color-mix(in srgb, var(--black) calc(var(--nav-alpha) * 100%), transparent);
+  transition: --nav-alpha var(--duration-base) ease;
+}
+.Navbar-container.is-solid {
+  --nav-alpha: 1;
+}
+
+/** 
+ * Registering the custom property makes it animatable. Without this, the transition
+ * above does nothing and the switch is instant (browsers that ignore @property just snap). 
+ */
+@property --nav-alpha {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.35;
+}
+
+.Navbar-element {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 10px 5px;
+  margin: 12px 10px;
+  color: var(--color-text);
+  font-size: 1.35rem;
+  font-family: var(--font-hud);
+  font-weight: 400;
+  text-decoration: none;
+  /* `transform` not `font-size` on hover: changing `font-size` reflows the whole bar and shoves the neighbouring links sideways. */
+  transition: color var(--duration-fast), transform var(--duration-fast);
+}
+.Navbar-element:hover {
+  color: var(--color-primary-text);
+  transform: scale(1.08);
+}
+.Navbar-element:active {
+  color: var(--color-secondary);
+}
+.Navbar-element.active {
+  color: var(--color-primary-text);
+}
+
+.Navbar-icon {
+  font-size: 1.2em;
+}
+
+@media (max-width: 768px) {
+  .Navbar-container {
+    top: auto;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    width: calc(100% - 24px);
+    justify-content: space-around;
+    padding: 0;
+  }
+  .Navbar-element {
+    flex-direction: column;
+    gap: 0.1rem;
+    margin: 8px 0;
+    font-size: 0.75rem;
+  }
+  .Navbar-icon {
+    font-size: 1.8rem;
+  }
+}

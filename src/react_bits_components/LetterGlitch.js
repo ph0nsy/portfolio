@@ -74,9 +74,9 @@ const LetterGlitch = ({
 
   const resizeCanvas = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (canvas === null) return;
     const parent = canvas.parentElement;
-    if (!parent) return;
+    if (parent === null) return;
 
     const dpr = window.devicePixelRatio || 1;
     const rect = parent.getBoundingClientRect();
@@ -94,17 +94,18 @@ const LetterGlitch = ({
     const { columns, rows } = calculateGrid(rect.width, rect.height);
     initializeLetters(columns, rows);
 
+    if(canvasRef === null) { return; }
     drawLetters();
   };
 
   const drawLetters = () => {
-    if (!context.current || letters.current.length === 0) return;
+    if (context.current === null || letters.current.length === 0) { return; }
     const ctx = context.current;
+    if(canvasRef.current === null) { return; }
     const { width, height } = canvasRef.current.getBoundingClientRect();
     ctx.clearRect(0, 0, width, height);
     ctx.font = `${fontSize}px monospace`;
     ctx.textBaseline = 'top';
-
     letters.current.forEach((letter, index) => {
       const x = (index % grid.current.columns) * charWidth;
       const y = Math.floor(index / grid.current.columns) * charHeight;
@@ -114,7 +115,7 @@ const LetterGlitch = ({
   };
 
   const updateLetters = () => {
-    if (!letters.current || letters.current.length === 0) return;
+    if (!letters.current || letters.current.length === 0) { return; }
 
     const updateCount = Math.max(1, Math.floor(letters.current.length * 0.05));
 
@@ -150,9 +151,8 @@ const LetterGlitch = ({
       }
     });
 
-    if (needsRedraw) {
-      drawLetters();
-    }
+    if(canvasRef === null) { return; }
+    if (needsRedraw) { drawLetters(); }
   };
 
   const animate = () => {
@@ -172,7 +172,7 @@ const LetterGlitch = ({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (canvas === null) return;
 
     context.current = canvas.getContext('2d');
     resizeCanvas();
@@ -185,6 +185,7 @@ const LetterGlitch = ({
       resizeTimeout = setTimeout(() => {
         cancelAnimationFrame(animationRef.current);
         resizeCanvas();
+        if (canvas === null) return;
         animate();
       }, 100);
     };

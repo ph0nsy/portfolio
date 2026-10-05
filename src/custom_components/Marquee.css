@@ -1,78 +1,56 @@
-@import url('https://fonts.googleapis.com/css2?family=BBH+Bartle&display=swap');
-
+/* Font and colors come from tokens.css. */
 .marquee {
-    position: relative;
-    overflow: hidden;
-    margin: 1vh 0 5vh 0;
-    --offset: 20vw;
-    --move-initial: calc(-25% + var(--offset));
-    --move-final: calc(-50% + var(--offset));
+  position: relative;
+  overflow: hidden;
+  margin: 1vh 0 5vh;
+  /* translate percentages refer to the inner strip's own width. With four copies,
+     25% is exactly one copy, so moving from -25% to -50% and restarting is seamless. */
+  --offset: 20vw;
+  --move-initial: calc(-25% + var(--offset));
+  --move-final: calc(-50% + var(--offset));
 }
 
 .marquee__inner {
-    width: fit-content;
-    display: flex;
-    position: relative;
-    transform: translate3d(var(--move-initial), 0, 0);
-    animation: marquee 5s linear infinite;
-    animation-play-state: running;
+  width: fit-content;
+  display: flex;
+  position: relative;
+  transform: translate3d(var(--move-initial), 0, 0);
+  animation: marquee 5s linear infinite;
+}
+.marquee__inner--reverse {
+  animation-direction: reverse;
 }
 
+/*.marquee:hover .marquee__inner { animation-play-state: paused; }*/
 
-.marquee__inner_inv {
-    width: fit-content;
-    display: flex;
-    position: relative;
-    transform: translate3d(var(--move-final), 0, 0);
-    animation: marquee_inv 5s linear infinite;
-    animation-play-state: running;
+.marquee__item {
+  display: inline-block;
+  position: relative;
+  padding-left: 2vw;
+  color: var(--color-text);
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: 400;
 }
-
-.marquee span {
-    color: white;
-    white-space: nowrap;
-    padding: 0 0 0 2vw;
-    font-family: "BBH Bartle", sans-serif;
-    font-weight: 400;
-    font-style: normal;
-    font-variant: small-caps;
-
-    display: inline-block;
-    position: relative;
-    text-align: center;
-
-    &:not(:last-child)::after {
-        width: 2vw;
-        content: " · ";
-        text-align: right;
-    }
-
-}
-
-.marquee:hover .marquee__inner {
-    animation-play-state: paused;
-}
-
-.marquee:hover .marquee__inner_inv {
-    animation-play-state: paused;
+.marquee__item:not(:last-child)::after {
+  content: "  ";
+  display: inline-block;
+  width: 3vw;
+  margin: auto;
+  text-align: right;
 }
 
 @keyframes marquee {
-    0% {
-        transform: translate3d(var(--move-initial), 0, 0);
-    }
-
-    100% {
-        transform: translate3d(var(--move-final), 0, 0);
-    }
+  from {
+    transform: translate3d(var(--move-initial), 0, 0);
+  }
+  to {
+    transform: translate3d(var(--move-final), 0, 0);
+  }
 }
 
-@keyframes marquee_inv {
-    0% {
-        transform: translate3d(var(--move-final), 0, 0);
-    }
-
-    100% {
-        transform: translate3d(var(--move-initial), 0, 0);
-    }
+@media (prefers-reduced-motion: reduce) {
+  .marquee__inner {
+    animation: none;
+  }
 }

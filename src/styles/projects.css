@@ -1,0 +1,445 @@
+/* Select with expanding panels. Colors, fonts and motion come from tokens.css. */
+.select {
+  --slant: var(--slant-md);
+  --panel-w: clamp(140px, 14vw, 190px); /* collapsed portrait */
+  --panel-open-w: min(1120px, 76vw); /* selected, expanded */
+  --panel-gap: 6px;
+  --grow: var(--duration-slow) var(--ease-out); /* keep in sync with settleAfter in useFollowCamera */
+}
+
+.roster-wrap {
+  position: relative;
+}
+
+.roster {
+  display: flex;
+  align-items: stretch;
+  /** 
+   * The viewport minus the navbar, the title and the control bar.
+   * `svh` is the viewport height with the mobile browser toolbars showing,
+   * so the control bar is not hidden behind them on phones. 
+   */
+  height: clamp(460px, calc(105vh - var(--nav-height) - 9rem), 900px);
+  margin: 0;
+  padding: 1.25rem 4.5rem 1rem;
+  list-style: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /** 
+   * No scroll-snap here on purpose: snapping also reacts to programmatic scrolling and
+   * would tug against the follow camera on every frame. The camera does the centering. 
+   */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-secondary) transparent;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 4rem,
+    #000 calc(100% - 4rem),
+    transparent
+  );
+}
+
+/* Panel: unclipped wrapper (filters, outline, cursor) around a clipped frame */
+.panel {
+  position: relative;
+  flex: 0 0 var(--panel-w);
+  min-width: 0;
+  /* Unselected panels are dimmed, like idle slots on a roster. */
+  filter: saturate(0.35) brightness(0.6);
+  transition: flex-basis var(--grow), filter var(--duration-fast),
+    translate var(--duration-fast) ease;
+}
+.panel + .panel {
+  margin-left: calc(var(--slant) * -1 + var(--panel-gap));
+}
+.panel:hover {
+  filter: saturate(0.8) brightness(0.9);
+}
+
+/**
+ * Selected: grows, full color, lifted, outlined.
+ * 
+ * The frame is clipped with clip-path, which also clips borders and `box-shadow`.
+ * `drop-shadow` on this unclipped parent traces the clipped shape instead; four offset
+ * shadows with no blur draw a solid 3px outline around the parallelogram. 
+ */
+.panel.is-open {
+  z-index: 1;
+  flex-basis: var(--panel-open-w);
+  translate: 0 -8px;
+  filter: drop-shadow(3px 0 0 var(--color-primary))
+    drop-shadow(-3px 0 0 var(--color-primary))
+    drop-shadow(0 3px 0 var(--color-primary))
+    drop-shadow(0 -3px 0 var(--color-primary))
+    drop-shadow(0 12px 16px rgb(0 0 0 / 0.6));
+}
+
+.panel__frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  clip-path: polygon(
+    var(--slant) 0,
+    100% 0,
+    calc(100% - var(--slant)) 100%,
+    0 100%
+  );
+  /* The original card gradient, behind 'contain' images and while images load. */
+  background: var(--gradient-frame);
+}
+
+.panel__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.panel__heading {
+  margin: 0;
+}
+
+/* The whole portrait is the button. */
+.panel__select {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.8), rgb(0 0 0 / 0) 60%);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+.panel.is-open .panel__select {
+  cursor: default;
+  background: none;
+}
+/* clip-path would cut a normal outline, so draw it inside the frame. */
+.panel__select:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -8px;
+}
+
+/** 
+ * Vertical name, read bottom to top. writing-mode turns the text column, the 180deg turn
+ * flips it so it reads upward. Centered horizontally, where the slanted edges never reach. 
+ */
+.panel__label {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-height: calc(100% - 2.5rem);
+  writing-mode: vertical-rl;
+  rotate: 183deg;
+  white-space: nowrap;
+}
+.panel__label-year {
+  font-family: var(--font-hud);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--color-primary);
+}
+.panel__label-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant: small-caps;
+}
+.panel.is-open .panel__label {
+  display: none;
+}
+
+/* Details, inside the expanded panel */
+.panel__details {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 0.8rem;
+
+  /** 
+   * Left edge slants from 0 (bottom) to --slant (top): half the slant clears it for text
+   * sitting in the lower half. The right edge is --slant in from the corner at the bottom. 
+   */
+  padding: 2rem calc(var(--slant) + 2rem) 2rem calc(var(--slant) / 2 + 2rem);
+  overflow-y: auto;
+  text-align: left;
+  pointer-events: none; /* clicks pass through to the panel, except on the controls below */
+  background: linear-gradient(
+      to top,
+      rgb(0 0 0 / 0.92) 10%,
+      rgb(0 0 0 / 0.65) 55%,
+      rgb(0 0 0 / 0) 85%
+    ),
+    linear-gradient(to right, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.25) 75%);
+  /* Waits for the panel to open part of the way, then fades in. */
+  animation: details-in 0.35s 0.25s ease both;
+}
+.panel__details[hidden] {
+  display: none;
+}
+.panel__details a,
+.panel__details button {
+  pointer-events: auto;
+}
+
+.panel__year {
+  margin: 0;
+  font-family: var(--font-hud);
+  font-size: 1.3rem;
+  color: var(--color-primary);
+  text-shadow: var(--color-surface) 0px 0 20px;
+}
+.panel__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.6vw, 3.4rem);
+  line-height: 1.05;
+  text-shadow: 2px 2px 10px var(--black);
+  margin-left: -5px;
+}
+.panel__description {
+  margin: 0;
+  max-width: 58ch;
+  line-height: 1.6;
+}
+
+/* Stack: plain text, separated by slashes (not buttons, so must not look like them). */
+.stack-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-soft);
+  font-size: 1.05rem;
+}
+.stack-list li:not(:last-child)::after {
+  content: "/";
+  margin: 0 0.5em;
+  color: var(--color-text-muted);
+}
+
+@keyframes details-in {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* Arrows, over the faded edges */
+.roster-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  translate: 0 -50%;
+  width: 52px;
+  height: 52px;
+  border: 2px solid var(--color-secondary);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-surface) 75%, transparent);
+  color: var(--color-text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.roster-arrow:hover {
+  background: var(--color-secondary);
+}
+.roster-arrow--prev {
+  left: 0.5rem;
+}
+.roster-arrow--next {
+  right: 0.5rem;
+}
+
+/* Control bar: counter, controls hint and filter in a single row */
+.control-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem 2rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-top: 2px solid var(--color-secondary);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+}
+.control-bar.is-mobile {
+  border-bottom: 2px solid var(--color-secondary);
+}
+.control-bar.is-mobile .tag-toggle {
+  font-size: 0.9rem;
+}
+.control-bar__blog {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  gap: 0.75rem 2rem;
+  padding: 1rem;
+  margin: 0 2.5vh 3rem;
+  border-bottom: 2px solid var(--color-secondary);
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+}
+
+.control-bar p {
+  margin: 0;
+}
+.control-bar__count {
+  color: var(--color-primary);
+  font-size: 1rem;
+}
+.control-bar__hint {
+  color: var(--color-text-muted);
+}
+
+.control-bar__filter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  margin-left: auto;
+}
+.control-bar__label {
+  color: var(--color-text-muted);
+}
+.control-bar__blog-label {
+  color: var(--color-text-muted);
+  font-size: 1.25rem;
+}
+
+.control-bar__blog-filter {
+  display: flex;
+  align-items: baseline;
+  justify-content: start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+select {
+  max-width: 30vw;
+  color: var(--color-paper);
+  border: 2px solid var(--color-secondary);
+  border-radius: 12px;
+  padding: 0.5rem 0.25rem 0.5rem 0.5rem;
+  cursor: pointer;
+  line-height: 1.1;
+  font-size: 0.95rem;
+  font-family: var(--font-hud);
+  background-color: var(--color-secondary);
+}
+
+/**
+ * One line that scrolls sideways if the languages ever outgrow the bar, instead of wrapping
+ * into a second row and pushing the roster up. 
+ */
+.control-bar .tag-filter {
+  margin: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  justify-content: center;
+  align-items: center;
+}
+.control-bar .tag-toggle {
+  padding: 0.2em 0.8em;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+/* The keyboard hint means nothing on touch screens. */
+@media (hover: none) {
+  .control-bar__hint {
+    display: none;
+  }
+}
+.select__empty {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 896px) {
+  .control-bar__label {
+    display: none;
+  }
+  .control-bar__blog {
+    flex-direction: row;
+    justify-content: space-evenly;
+  }
+}
+
+@media (max-width: 452px) {
+  .control-bar__blog-label {
+    font-size: 0.9rem;
+    text-align: right;
+  }
+  .control-bar__blog {
+    font-size: 0.9rem;
+    padding: 0.2rem 0.1rem 0.5rem 0.2rem;
+    flex-direction: row-reverse;
+  }
+}
+/* Small screens: same but narrower portraits and wider open panel */
+@media (max-width: 768px) {
+  .select {
+    --slant: var(--slant-sm);
+    --panel-w: 72px;
+    --panel-open-w: 82vw;
+  }
+  select {
+    font-size: 0.8rem;
+  }
+  .control-bar__blog-label {
+    font-size: 0.95rem;
+  }
+
+  /* Also clear the navbar docked at the bottom of the screen on mobile. */
+  .roster {
+    height: calc(100svh - 15rem);
+    min-height: 380px;
+    padding-inline: 2.5rem;
+  }
+  .control-bar {
+    padding-inline: 0.5rem;
+    gap: 0.75rem;
+  }
+  .control-bar__label {
+    display: none;
+  }
+  .panel__label-title {
+    font-size: 1rem;
+  }
+  .panel__details {
+    padding: 1.25rem calc(var(--slant) + 1rem) 1.25rem
+      calc(var(--slant) / 2 + 1rem);
+  }
+  .panel__description {
+    font-size: 0.95rem;
+  }
+  .roster-arrow {
+    width: 38px;
+    height: 38px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    transition: none;
+  }
+  .panel__details {
+    animation: none;
+  }
+}

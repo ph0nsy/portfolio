@@ -1,6 +1,5 @@
 import './LogoLoop.css';
 import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
-import { useTags } from '../hooks/useTagsContext'
 
 const ANIMATION_CONFIG = { SMOOTH_TAU: 0.25, MIN_COPIES: 2, COPY_HEADROOM: 2 };
 
@@ -134,8 +133,6 @@ export const LogoLoop = memo(
     className,
     style
   }) => {
-    const { addTag, removeAll } = useTags();
-      
     const containerRef = useRef(null);
     const trackRef = useRef(null);
     const seqRef = useRef(null);
@@ -259,10 +256,6 @@ export const LogoLoop = memo(
         const itemContent = item.href ? (
           <a
             className="logoloop__link cursor-target"
-            onClick={() => {
-              /*if (item.href !== "") addTag(item.href);
-              else removeAll();*/
-            }}
             aria-label={itemAriaLabel || 'logo link'}
             target="_blank"
             rel="noreferrer noopener"

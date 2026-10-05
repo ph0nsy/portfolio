@@ -1,0 +1,122 @@
+.post {
+  max-width: min(120ch, 90vw);
+  min-width: 50vw;
+  margin: 0 auto;
+  padding: calc(var(--nav-height) + 3rem) 1.25rem 5rem;
+  text-align: left;
+}
+.post__header {
+  text-align: center;
+}
+.post__title {
+  margin: 0;
+  font-size: clamp(2.2rem, 6vw, 3.5rem);
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--color-primary-text);
+  line-height: 1.1;
+}
+.post__subtitle {
+  margin: 0.75rem 0 0;
+  font-size: 1.1rem;
+  color: var(--color-text-soft);
+}
+.post__meta {
+  margin: 0.5rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+.post__cover {
+  display: block;
+  width: 100%;
+  margin: 2.5rem 0;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.post__status {
+  color: var(--color-text-muted);
+}
+
+/* Markdown content */
+.prose {
+  font-size: 1.1rem;
+  line-height: 1.75;
+}
+.prose h2 {
+  margin: 2.5rem 0 0.75rem;
+  line-height: 1.35;
+  color: var(--color-primary-text);
+}
+.prose h3 {
+  margin: 1.75rem 0 1rem;
+  line-height: 1.2;
+  color: var(--color-text-muted);
+}
+.prose p,
+.prose ul,
+.prose ol {
+  margin: 0 0 1.2rem;
+}
+.prose a {
+  color: var(--color-primary-text);
+}
+.prose img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
+  transition: all 0.25s ease-in;
+}
+.prose img:hover {
+  transform: scale(1.1);
+  overflow: visible;
+  object-fit: cover;
+}
+.prose blockquote {
+  margin: 1.5rem 0;
+  padding-left: 1rem;
+  border-left: 4px solid var(--color-secondary);
+  color: var(--color-text-soft);
+}
+.prose code {
+  padding: 0.15em 0.35em;
+  background: var(--color-border);
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+.prose pre {
+  padding: 1rem;
+  overflow-x: auto;
+  background: var(--color-border);
+  border-radius: 5px;
+}
+.prose pre code {
+  padding: 0;
+  background: none;
+}
+.prose table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.prose table:has(img) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  border-collapse: collapse;
+  flex-direction: column;
+  margin: 1rem 0 2rem 0;
+  & > thead {
+    visibility: collapse;
+  }
+  &:hover {
+    cursor: pointer;
+  }
+}
+.prose th,
+.prose td {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--color-border);
+}

@@ -1,0 +1,237 @@
+/* Tokens live in tokens.css. */
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+/* Hash links (/#contact) land below the fixed navbar instead of under it. */
+html {
+  scroll-padding-top: var(--nav-height);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.small-caps {
+  font-variant: small-caps;
+}
+
+/* Generic page shell for Projects, Blog, 404. */
+.page {
+  padding: calc(var(--nav-height) + 0.25rem) var(--page-gutter) 1.5rem;
+  min-height: 80vh;
+  text-align: left;
+}
+.page__header {
+  margin-bottom: 2rem;
+}
+.page__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 1.1;
+}
+.page--compact {
+  padding-top: calc(var(--nav-height) + 1rem);
+}
+.page--compact .page__header {
+  margin-bottom: 0.75rem;
+}
+.page--compact .page__title {
+  font-size: clamp(1.3rem, 2.4vw, 2rem);
+}
+.page__intro {
+  margin: 1rem 0 0;
+  max-width: 60ch;
+  color: var(--color-text-soft);
+}
+
+/* Buttons */
+.button {
+  display: inline-block;
+  padding: 0.6em 1.4em;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.button:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+.button:active {
+  color: var(--color-paper);
+  background: var(--color-ink);
+  cursor: progress;
+}
+.button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.button--ghost {
+  background: transparent;
+  color: inherit;
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Tags (pills in the mockup) */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tag {
+  padding: 0.25em 0.7em;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-pill);
+  font-size: 0.9rem;
+  font-variant: small-caps;
+}
+
+/** 
+ * Tag toggles (blog filters, project filters, tags inside an open project).. 
+ */
+.tag-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.tag-toggle {
+  padding: 0.35em 0.9em;
+  border: 2px solid var(--color-secondary);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-hud);
+  font-size: large;
+  font-variant: small-caps;
+  cursor: pointer;
+}
+.tag-toggle:hover {
+  background: color-mix(in srgb, var(--color-secondary) 35%, transparent);
+}
+.tag-toggle[aria-pressed="true"] {
+  background: var(--color-secondary);
+  color: var(--color-on-secondary);
+  text-shadow: 2px 2px 6px var(--black);
+}
+.tag-toggle--small {
+  font-size: 0.8rem;
+}
+
+/* Used on the blog grid and in the home page featured section. */
+.post-card {
+  color: var(--color-paper);
+  background: var(--color-ink);
+  padding: 0 0 0.25rem 0;
+  border: solid 2px var(--color-secondary);
+  margin: 1.5rem 0;
+  max-width: 460px;
+  box-shadow: 5px 5px 0px 0px var(--color-secondary);
+}
+.post-card__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+.post-card__image {
+  width: 100%;
+  aspect-ratio: 5 / 3;
+  object-fit: cover;
+  display: block;
+  border-bottom: solid 4px var(--color-secondary);
+}
+.post-card__body {
+  padding: 0.9rem 1rem 1.2rem;
+  text-align: left;
+}
+.post-card__title {
+  margin: 0 0 0.3rem;
+  font-size: 1.6rem;
+  line-height: 1.15;
+}
+.post-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+.post-card__meta > :first-child {
+  width: 100%;
+}
+.post-card__description {
+  margin: 0.7rem 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.post-card:hover {
+  border-color: var(--color-primary) !important;
+  box-shadow: 10px 10px 0px 0px var(--color-primary);
+}
+.post-card__link:hover .post-card__title,
+.post-card__link:focus-visible .post-card__title {
+  text-decoration: underline;
+  text-decoration-color: var(--color-primary);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 2rem;
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .button {
+    font-size: 0.9rem;
+  }
+  .post-card {
+    height: auto;
+  }
+}

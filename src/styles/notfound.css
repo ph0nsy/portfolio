@@ -1,0 +1,23 @@
+.not-found__page {
+    display: grid;
+    place-items: center;
+}
+
+.not-found__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;    
+    align-items: center;
+}
+
+div.not-found__body > h1,
+div.not-found__body > h2 {    
+    text-align: center;
+    font-family: var(--font-hud);
+}
+
+div.not-found__body > img {	
+    width: 35vw;
+	aspect-ratio: 1;
+	object-fit: cover;
+}
