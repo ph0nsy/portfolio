@@ -1,4 +1,4 @@
-Lately I've been interested in learning about embeded software; I was vaguely aware of some of the concepts (kernels, device trees, registers) but I wanted to get my hands dirty and put them into practice. So, since I own a R36S console, I set myself a concrete goal: **write a real Linux kernel driver for it and get it running end to end.**
+Lately I've been interested in learning about embedded software; I was vaguely aware of some of the concepts (kernels, device trees, registers) but I wanted to get my hands dirty and put them into practice. So, since I own a R36S console, I set myself a concrete goal: **write a real Linux kernel driver for it and get it running end to end.**
 
 The R36S is an **RK3326 based handheld game console running ArkOS**. The goal was an input driver, something that reads a physical button and reports it to userspace, which I thought was my best option without needing to buy any equipment.
 
@@ -41,7 +41,7 @@ Linux version 4.4.189 (dev@rk3326-dev) (gcc version 6.3.1 20170404 (Linaro GCC 6
 > R36S into the same network as your machine (**this post assumes a Linux desktop or Virtual Machine**) and then  
 > connect into the handheld via SSH with a client such as [_Putty_](https://www.ssh.com/academy/ssh/client).
 >
-> If your machine doens't have WiFi built-in or you are having trouble connecting, I recommend you check the 
+> If your machine doesn't have WiFi built-in or you are having trouble connecting, I recommend you check the 
 > following posts:
 > - [R36S Wi-Fi Setup Guide](https://r36s.org/articles/guide-wifi-setup).
 > - [dov/r36s-programming](https://github.com/dov/r36s-programming).
@@ -212,7 +212,7 @@ We expect to see "hello_module: loaded" and then "hello_module: unloaded" in `dm
 
 ## Finding the board's device tree
 
-The kernel's own documentation spells out why a device tree exists at all: ARM SoCs, unlike x86, generally can't enumerate their own hardware at boot the way PCI or ACPI does. GPIO pins, I2C devices, and other peripherals are wired in ways fixed at hardware design time, so something has to tell the kernel what's physically connected and to what. That is the device tree: a `.dts` (or shared `.dtsi`) source file, compiled by `dtc` into a `.dtb` binary the bootloader hands to the kernel at boot. We can see the `.dts` files on our Linux kernel by searching for the board name on the kernel's directory:
+GPIO pins and other peripherals are wired in ways fixed at hardware design time, so something has to tell the kernel what's physically connected and to what. And that something is the device tree: a `.dts` (or shared `.dtsi`) source file, compiled by `dtc` into a `.dtb` binary the bootloader hands to the kernel at boot. We can see the `.dts` files on our Linux kernel by searching for the board name on the kernel's directory:
 
 ```bash
 find . -iname "*rg351*" -path "*dts*"
@@ -246,7 +246,7 @@ gpio-keys {
 };
 ```
 
-Let's look at the shape of the example node. `compatible` is the string a driver's own `of_match_table` matches against at boot, it's the link between a device tree node and the ***C*** code. `gpio2` here is a label, a name defined elsewhere that this node references by phandle (`&gpio2`), pointing at the actual GPIO controller node this button's pin lives on. `RK_PA0` is a macro (from `dt-bindings/pinctrl/rockchip.h`) meaning "port A, pin 0" on that controller.
+Let's look at the shape of the example node. `compatible` is the string a driver's own `of_match_table` matches against at boot, it's the link between a device tree node and the ***C*** code. `gpio2` here is a label, a name defined elsewhere that this node references by pointer handle (`&gpio2`), pointing at the actual GPIO controller node this button's pin lives on. `RK_PA0` is a macro (from `dt-bindings/pinctrl/rockchip.h`) meaning "port A, pin 0" on that controller.
 
 > **Further reading**
 >
@@ -273,7 +273,7 @@ One commented entry stood out:
 };*/
 ```
 
-A known pin with the hardware wiring but disabled in software. Seems like a good candidate for our driver; one we should check, either way. `evtest` reads from `/dev/input/event*`, the kernel's own raw keycodes, with nothing in between (like SDL input layer). Pressing every button and combination while watching for `BTN_TRIGGER_HAPPY6` turned up nothing. F6 is not disabled it just ins't there at all.
+A known pin with the hardware wiring but disabled in software. Seems like a good candidate for our driver; one we should check, either way. `evtest` reads from `/dev/input/event*`, the kernel's raw keycodes, with nothing in between (like SDL input layer). Pressing every button and combination while watching for `BTN_TRIGGER_HAPPY6` turned up nothing. F6 is not disabled, it just isn't there at all.
 
 With that we rule out F6 as an option. Looking now for the SELECT/START pair, we could guess they are sw9/sw10 from their position in the ASCII diagram, but that turns out to be wrong. Neither switch number appeared anywhere in the gpio-keys-polled node. A `grep` across the file eventually turned up a second, separate, plain (non-polled) gpio-keys node entirely:
 
@@ -307,7 +307,7 @@ Tracing the include chain: `rk3326-rg351mp-linux.dts` includes `rk3326.dtsi`, wh
 ||
 |:-:|
 | ![px30_gpio](px30_gpio.png) |
-| gpio1, gpio2 and gpio3 physical adressess. |
+| gpio1, gpio2 and gpio3 physical addresses. |
 
 
 That's the physical base address. The relevant register offsets within that bank, `GPIO_SWPORT_DR` (0x00, output data), `GPIO_SWPORT_DDR` (0x04, pin direction), and critically `GPIO_EXT_PORT` (0x50, the live input pin state, regardless of configured direction), came from grepping the kernel's `drivers/pinctrl/pinctrl-rockchip.c` — the driver which is using them. 
@@ -447,7 +447,7 @@ Once we know this works on one bank, we can scale to all three GPIO banks the bo
 
 Now that we can read the three banks, we move onto interface design. Initially, I thought about a background kernel timer continuously refreshing a cached value, supporting blocking `read()` / `poll()` calls. 
 
-So what is the tradeoff here exactly. On one hand, a live register read on demand (the _"pull"_ model) always reflects the true state **only** at the exact moment it's called; while, on the other hand, a cached value refreshed on a timer (the _"push"_ model) is, at best, however old the last tick was. 
+So, what's the tradeoff here exactly? On one hand, a live register read on demand (the _"pull"_ model) always reflects the true state **only** at the exact moment it's called; while, on the other hand, a cached value refreshed on a timer (the _"push"_ model) is, at best, however old the last tick was. 
 
 The limitation is easy to work out: a press shorter than the sampling interval behaves identically in both designs; it comes with polling itself, regardless of when the polling happens. Given that, and given this driver's actual purpose (poll-on-demand monitoring, not a real-time input pipeline), the simpler _pull_ design seems more sensible (a push design would mean: no timer, no spinlock, no wait queue, each `read()` does one live register read and returns).
 
