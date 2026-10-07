@@ -92,9 +92,8 @@ The last line of that output should read exactly: `gcc version 6.3.1 20170404 (L
 
 > **Further Reading**
 >
-> I couldn't find this exact technique, matching a device's own `uname -a`/GCC string before building anything, 
-> written up in one canonical guide, but it seems to be an established practice across several separate 
-> embedded communities.
+> The whole matching a device's own `uname -a`/GCC string before building anything,
+> seems to be an established practice across several embedded communities.
 >
 > The [Android Build Kernel Modules how to](https://source.android.com/docs/setup/build/building-kernels) states 
 > the principle directly for Android devices; 
@@ -256,7 +255,7 @@ Let's look at the shape of the example node. `compatible` is the string a driver
 ## Picking a target
 ### Switch mapping
 
-The board's `.dts` contains an ASCII art comment mapping every switch (sw1 through sw22) to its physical position, D-pad, face buttons, shoulder buttons, all laid out spatially, alongside a `gpio-keys-polled` node with a real child node per switch, each with label, gpios, and linux,code.
+The board's `.dts` contains an ASCII diagram mapping every switch (sw1 through sw22) to its physical position, D-pad, face buttons, shoulder buttons, all laid out spatially, alongside a `gpio-keys-polled` node with a real child node per switch, each with label, gpios, and linux,code.
 
 ||
 |:-:|
