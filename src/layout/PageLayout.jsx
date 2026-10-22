@@ -17,7 +17,7 @@ function PageLayout({
     <div className={`page ${className}`}>
       {title && intro && (
         <header className="page__header">
-          {title && <h1 className="page__title">{title}</h1>}
+          {/*title && <h1 className="page__title">{title}</h1>*/}
           {intro && <p className="page__intro">{intro}</p>}
         </header>
       )}

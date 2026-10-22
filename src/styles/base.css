@@ -4,6 +4,13 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
+  cursor: url('../../public/assets/arrow.png') 0 0, default !important; /* fallback to default arrow */
+}
+a, button {
+  cursor: url('../../public/assets/pointer.png') 0 0, pointer !important; /* fallback to standard pointer */
+}
+input[type="text"], textarea {
+  cursor: url('../../public/assets/text.png') 0 0, text !important; /* fallback to standard text cursor */
 }
 
 /* Hash links (/#contact) land below the fixed navbar instead of under it. */

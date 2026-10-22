@@ -39,7 +39,6 @@
     transparent
   );
 }
-
 /* Panel: unclipped wrapper (filters, outline, cursor) around a clipped frame */
 .panel {
   position: relative;
@@ -315,10 +314,10 @@
   margin-left: auto;
 }
 .control-bar__label {
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 .control-bar__blog-label {
-  color: var(--color-text-muted);
+  color: var(--color-text);
   font-size: 1.25rem;
 }
 

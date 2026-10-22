@@ -55,7 +55,7 @@
 .prose p,
 .prose ul,
 .prose ol {
-  margin: 0 0 1.2rem;
+  margin: 0.5rem 0 1.2rem;
 }
 .prose a {
   color: var(--color-primary-text);
@@ -81,17 +81,23 @@
 .prose code {
   padding: 0.15em 0.35em;
   background: var(--color-border);
+  color: var(--color-primary-text);
   border-radius: 3px;
-  font-size: 0.9em;
+  font-size: 1.05rem !important;
 }
 .prose pre {
-  padding: 1rem;
   overflow-x: auto;
-  background: var(--color-border);
+  background: var(--color-surface);
   border-radius: 5px;
 }
-.prose pre code {
+.prose pre div {
+  overflow-x: auto;
+  background: var(--color-surface) !important;
+  border-radius: 12px;
+}
+.prose pre div code {
   padding: 0;
+  background: var(--color-surface) !important;
   background: none;
 }
 .prose table {
@@ -99,7 +105,6 @@
   overflow-x: auto;
   border-collapse: collapse;
 }
-
 .prose table:has(img) {
   display: flex;
   justify-content: center;
@@ -118,5 +123,5 @@
 .prose th,
 .prose td {
   padding: 0.4rem 0.8rem;
-  border: 1px solid var(--color-border);
+  border: 3px solid var(--color-border);
 }

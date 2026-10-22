@@ -8,24 +8,13 @@
  */
 export const POSTS = [{
 		slug: 'hello-world',
-		title: 'Hello world!',
+		title: 'Hello blog!',
 		date: '2026-09-29',
 		readTime: 2,
 		description: 'Why this blog exists and what to expect from it: devlogs, notes on gameplay systems and the occasional deep dive into search and planning.',
 		image: 'posts/hello-world/cover.png',
 		tags: [],
 	},
-	/*
-	{
-		slug: 'camera-system',
-		title: "Breaking down Lady Umbrella's Camera system",
-		date: '2026-10-05',
-		readTime: 3,
-		description: 'Breaking down the implementation of the third person camera system for the action-adventure game Lady Umbrella.',
-		image: 'posts/camera-system/cover.jpg',
-		tags: ['Game Development'],
-	},
-	*/
 	{
 		slug: 'r36s-driver',
 		title: 'Creating a driver for R36S from scratch',
@@ -35,6 +24,15 @@ export const POSTS = [{
 		image: 'posts/r36s-driver/cover.png',
 		tags: ['Embedded Software'],
 	},	
+	{
+		slug: 'camera-system',
+		title: "Breaking down Lady Umbrella's Camera system",
+		date: '2026-10-26',
+		readTime: 3,
+		description: 'Breaking down my implementation of the third person camera system for the action-adventure game Lady Umbrella.',
+		image: 'posts/camera-system/cover.png',
+		tags: ['Game Development'],
+	},
 ];
 
 /* Latest post (by date) will appear first. */

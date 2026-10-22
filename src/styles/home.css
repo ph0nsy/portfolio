@@ -41,6 +41,13 @@
   color: var(--color-ink);
   min-height: 40vh;
 }
+.about__inner__sm {
+  margin: -0.1vh 0;
+  padding: 3vh var(--page-gutter) 0;
+  background: var(--color-ink);
+  color: var(--color-text);
+  min-height: 40vh;
+}
 .about__title {
   margin: 0;
   font-family: var(--font-display);
@@ -55,16 +62,29 @@
 }
 .about__photo {
   float: right;
-  max-width: 40%;
-  margin: -10vh 0 2vh 2vh;
+  max-width: 35%;
+  margin: -15vh 0 2vh 8vh;
+  shape-outside: polygon(50% 0%, 100% 50%, 50% 100%, 10% 60%);
+  shape-margin: 5rem;
+}
+.about__photo__sm {
+  float: right;
+  max-width: 32vw;
+  margin: -10vh 2vw 2vh 2vh;
   shape-outside: polygon(50% 0%, 100% 50%, 50% 100%, 10% 60%);
   shape-margin: 5rem;
 }
 .about__text p {
   margin: 0 0 1rem;
   text-align: left;
-  font-size: 24px;
-  line-height: 2.2rem;
+  font-size: 1.5rem;
+  line-height: 1.9rem;
+}
+.about__text__sm p {
+  margin: 0 0 1rem;
+  text-align: left;
+  font-size: 1.25rem;
+  line-height: 1.65rem;
 }
 
 /* Skills (with flex gap). */
@@ -235,7 +255,8 @@
 }
 
 @media (max-width: 768px) {
-  .about__photo {
+  .about__photo,
+  .about__photo__sm {
     float: none;
     display: block;
     max-width: 70%;

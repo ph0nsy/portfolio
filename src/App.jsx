@@ -12,6 +12,7 @@ import HomePage from "./pages/HomePage";
 import ProjectsPage from "./pages/ProjectsPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
+import ContactPage from "./pages/ContactPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 /* The router is created once. Creating it inside a component would rebuild it (and lose history state) every render. */
@@ -25,6 +26,7 @@ const router = createBrowserRouter(
         { path: "projects", element: <ProjectsPage /> },
         { path: "blog", element: <BlogPage /> },
         { path: "blog/:slug", element: <BlogPostPage /> },
+        { path: "contact", element: <ContactPage /> },
         { path: "*", element: <NotFoundPage /> },
       ],
     },

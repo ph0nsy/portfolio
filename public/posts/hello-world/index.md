@@ -1,4 +1,6 @@
-***Hello World!***
+```
+Hello Blog!
+```
 
 Since I've been doing more and more development stuff lately, I wanted a place where I could explain and write down the things I work on. Sort of like a notebook for the things I've learned, and maybe even something that can serve as a reference or guide for people trying to build the same kinds of things I've been working on.
 

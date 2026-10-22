@@ -6,7 +6,7 @@ import '../styles/projects.css';
 function ProjectsPage() {
   return (
     <PageLayout
-      //title="Projects"
+      title="Projects"
       //intro="Select a project to see what I worked on. Select tags to narrow the list."
       className="page--projects"
     >
