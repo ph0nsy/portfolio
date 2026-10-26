@@ -35,7 +35,7 @@ function BlogPostPage() {
   // check img clicks for modal
   useEffect(() => {
     const handler = (event) => { 
-      if (event.target.tagName === "IMG") {
+      if (event.target.tagName === "IMG" && event.target.src.substr(-9) != "cover.png") {
         setIsModalImage(String(event.target.src));
         setIsModalOpen(true);
         console.log("Clicked:" + event.target.src)

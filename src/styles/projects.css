@@ -111,7 +111,6 @@
   cursor: pointer;
 }
 .panel.is-open .panel__select {
-  cursor: default;
   background: none;
 }
 /* clip-path would cut a normal outline, so draw it inside the frame. */
