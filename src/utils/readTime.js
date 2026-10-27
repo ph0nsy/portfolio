@@ -1,7 +1,9 @@
+import { publicUrl } from "../config";
+
 const READ_SPEED = 230 // WPM (words per minute)
 
 export async function getReadTimeFromFileUrl(slug) {
-    return fetch(`posts/${slug}/index.md`)
+    return fetch(publicUrl(`posts/${slug}/index.md`))
     .then((response) => {
         const isHtml = response.headers
           .get("content-type")
