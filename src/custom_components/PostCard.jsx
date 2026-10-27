@@ -19,7 +19,7 @@ function PostCard({ post, headingLevel: Heading = "h3" }) {
           <div className="post-card__meta">
             <span>
               <time dateTime={post.date}>{formatDate(post.date)}</time> |{" "}
-              {post.readTime === '?' ? getReadTimeFromFileUrl(post.slug) : readTime} min read
+              {post.readTime === '?' ? getReadTimeFromFileUrl(post.slug) : post.readTime} min read
             </span>
             <ul className="tag-list" aria-label="Tags">
               {post.tags.map((tag) => (
