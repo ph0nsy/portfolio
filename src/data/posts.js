@@ -28,7 +28,7 @@ export const POSTS = [{
 	{
 		slug: 'camera-system',
 		title: "Breaking down Lady Umbrella's Camera system",
-		date: '2026-10-26',
+		date: '2026-10-27',
 		readTime: getReadTimeFromFileUrl('camera-system'), // estimated word size for this post
 		description: 'Breaking down my implementation of the third person camera system for the action-adventure game Lady Umbrella.',
 		image: 'posts/camera-system/cover.png',

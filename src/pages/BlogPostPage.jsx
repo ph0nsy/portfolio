@@ -144,7 +144,7 @@ function BlogPostPage() {
         <p className="post__subtitle">{post.description}</p>
         <p className="post__meta">
           <time dateTime={post.date}>{formatDate(post.date)}</time> |{" "}
-          {post.readTime} min read
+          {post.readTime === '?' ? getReadTimeFromFileUrl(post.slug) : readTime} min read
         </p>
       </header>
 

@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { publicUrl } from "../config";
 import { formatDate } from "../utils/format";
+import { getReadTimeFromFileUrl } from "../utils/readTime";
 
 /* Tags are plain text inside it because the whole card is one link. */
 function PostCard({ post, headingLevel: Heading = "h3" }) {
@@ -18,7 +19,7 @@ function PostCard({ post, headingLevel: Heading = "h3" }) {
           <div className="post-card__meta">
             <span>
               <time dateTime={post.date}>{formatDate(post.date)}</time> |{" "}
-              {post.readTime} min read
+              {post.readTime === '?' ? getReadTimeFromFileUrl(post.slug) : readTime} min read
             </span>
             <ul className="tag-list" aria-label="Tags">
               {post.tags.map((tag) => (
