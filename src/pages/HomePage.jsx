@@ -1,6 +1,6 @@
 import { useMobile } from "../hooks/useMobile";
 import { useInView } from "../hooks/useInView";
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { useDocumentTitle, useDocumentDescription, useDocumentImage } from "../hooks/useDOM";
 
 import Header from "../custom_components/Header";
 import AboutSection from "../sections/AboutSection";
@@ -12,6 +12,8 @@ import "../styles/home.css";
 function HomePage() {
   const { isMobile } = useMobile();
   useDocumentTitle(null);
+  useDocumentDescription(null);
+  useDocumentImage(null);
 
   /* Once it has fully left the viewport, opaque content covers it, the hero's animations can stop. */
   const [spacerRef, heroVisible] = useInView({ initial: true });

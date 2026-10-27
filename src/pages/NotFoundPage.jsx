@@ -5,7 +5,7 @@ import "../styles/notfound.css";
 
 function NotFoundPage() {
   return (
-    <PageLayout title="Page not found" className='not-found__page'>
+    <PageLayout title="Page not found" desc="Page not found, try another." className='not-found__page'>
       <div className='not-found__body'>
           <img src="https://tenor.com/en-GB/view/ehe-anime-gif-anime-girl-teehee-gif-27178660.gif"></img>  
           <h1>

@@ -6,7 +6,7 @@ import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import {materialDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { useDocumentDescription, useDocumentImage, useDocumentTitle } from "../hooks/useDOM";
 import BackLink from "../custom_components/BackLink";
 import Modal from '../custom_components/Modal';
 import NotFoundPage from "./NotFoundPage";
@@ -21,8 +21,11 @@ const MAX_TITLE_LEN = 20;
 function BlogPostPage() {
   const { slug } = useParams();
   const post = getPost(slug);
-  let postFormatted = post?.title.slice(0, Math.min(post?.title.length, MAX_TITLE_LEN));
-  useDocumentTitle((postFormatted ?? "Post not found") + (post?.title.length > MAX_TITLE_LEN ? "..." : ""));
+  let tlt = post?.title.slice(0, Math.min(post?.title.length, MAX_TITLE_LEN));
+  let fmtTitle = (tlt ?? "Post not found") + (post?.title.length > MAX_TITLE_LEN ? "..." : "");
+  useDocumentTitle(fmtTitle);
+  useDocumentDescription(post?.description);
+  useDocumentImage(post?.image);
 
   // 'loading' | 'ready' | 'error'
   const [state, setState] = useState({ status: "loading", text: "" });
@@ -132,7 +135,7 @@ function BlogPostPage() {
 
   return (
     <article className="post">
-      <BackLink fallback="/blog">Back to all posts</BackLink>
+      <BackLink fallback="/blog"><span className="arrow"></span>     Back to all posts</BackLink>
 
       <Modal isOpen={isModalOpen} onClose={closeModal} child={modalImage}/>
 
@@ -148,8 +151,13 @@ function BlogPostPage() {
       <img className="post__cover" src={publicUrl(post.image)} alt="" />
 
       <div className="post__body prose">
-        {state.status === "loading" && (
-          <p className="post__status">Loading post...</p>
+        {/* From https://cssLoaders.github.io/ */}
+        {state.status === "loading" && (  
+          <p className="post__status">
+            Loading post...
+            <br/>
+            <span className="contact__loader"></span>
+          </p>
         )}
         {state.status === "error" && (
           <p className="post__status">

@@ -243,9 +243,12 @@ html {
 }
 
 .back-link {
-  display: inline-block;
-  margin-bottom: 2rem;
   color: inherit;
+  display: inline-block;
+  font-size: medium;
+  text-decoration: none;
+  font-family: var(--font-hud);
+  margin-bottom: 2rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

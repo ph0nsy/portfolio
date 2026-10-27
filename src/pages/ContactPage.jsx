@@ -5,10 +5,11 @@ import ContactSection from "../sections/ContactSection";
 
 import "../styles/home.css";
 
-function BlogPage() {
+function ContactPage() {
   return (
     <PageLayout
       title="Contact"
+      desc="Know more about me and, if you ant, get in touch with me!"
       className="page--blog"
     >
       <AboutSection simplified={true} animated={false}/>
@@ -17,4 +18,4 @@ function BlogPage() {
   );
 }
 
-export default BlogPage;
+export default ContactPage;

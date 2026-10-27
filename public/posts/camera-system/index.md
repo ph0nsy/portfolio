@@ -1,11 +1,11 @@
 
-Lady Umbrella is a 3d action-adventure shooter in which the player plays the role of special agent Francesca De Angelis (aka Lady Umbrella) who, while infiltrating the last mafia family in Italy, is betrayed and incriminated by her partner. She must now clear her name by preventing her own agency from arresting her, and defeating the mafia using her main weapon: a high-tech shotgun umbrella that functions as a shield and contains multiple hidden gadgets.
+Lady Umbrella is a 3D action-adventure shooter in which the player plays the role of special agent Francesca De Angelis (aka Lady Umbrella) who, while infiltrating the last mafia family in Italy, is betrayed and incriminated by her partner. She must now clear her name by preventing her own agency from arresting her, and defeating the mafia using her main weapon: a high-tech shotgun umbrella that functions as a shield and contains multiple hidden gadgets.
 
 > 🎮 Check [Lady Umbrella](https://store.steampowered.com/app/3956890/Lady_Umbrella/) out on Steam.
 
-This project was made as part of a Educa. It was done in Unreal Engine 5.5.3 and completely in C++ (except for material shaders, animation blueprints and some small trigger events). 
+This project was made as part of a year-long Game Programming Bootcamp at [U-TAD](https://estudiar.u-tad.com/brand/) (alongside some classes) in which we collaborated between a design team and art team (and a few others). It was done in Unreal Engine 5.5.3 and completely in C++ (except for material shaders, animation blueprints and some small trigger events). 
 
-Although there is a lot of effort from a lot of people in the fame packed in the game taking the shape of the different systems it is made of; today I will be focusing on one of the biggest parts I implemented: the Camera System.
+Many people put effort into the systems that make up the game, but today I’ll focus on one of the biggest parts I implemented: the camera system.
 
 # Camera System Overview
 
@@ -21,7 +21,7 @@ This is a custom camera system that handles everything from collisions to aiming
 ||
 |:---:|
 | ![Camera System](CameraSystem.jpeg) | 
-| Diagram of Camera Component's structure, made of a Camera and its Camera Boom. As you can see, the Camera is slightly offeseted towards the top right from the straight line one would expect. |
+| Diagram of Camera Component's structure, made of a Camera and its Camera Boom. As you can see, the Camera is slightly offset towards the top right from the straight line one would expect. |
 
 > 🚨 **Important**
 >
@@ -32,7 +32,7 @@ This is a custom camera system that handles everything from collisions to aiming
 
 > 📝 **Note**
 >
-> The code that will appear in the snippets from this point onwards may include small corrections that were not on the source code (mostly name and order of functions and variables to ease the understanding).
+> The code that will appear in the snippets from this point onwards **may include corrections that were not on the source code** (mostly name and order of functions and variables to ease the understanding or known bug corrections).
 
 ## Ticking with the Player
 
@@ -44,7 +44,7 @@ void UCustomCameraSystemComponent::CameraTick(const float& DeltaSeconds)
     UpdateForCameraState(DeltaSeconds);
     if (bCameraIsResetting)
     {
-      ResetCamProgress(GetWorld()->GetDeltaSeconds());
+      ResetCamProgress(DeltaSeconds);
     }
     ManageCameraCollisions();
     UpdateCameraContext(DeltaSeconds);
@@ -54,9 +54,11 @@ void UCustomCameraSystemComponent::CameraTick(const float& DeltaSeconds)
 
 This shows the order in which everything that is _"real time"_ or rather frame-based, is handled. Almost everything in the system is related somehow to one of the functions within `CameraTick()`.
 
-Additionally, given there is a heavy reliance on interpolation, the order in which each task is handled inside of `CameraTick()` is really important. If the camera checked for collisions before updating the interpolating position, we might find that, after interpolating, the camera runs into wall; however, the collision adjustment isn't made until a the next frame; or even worse, we start a loop of correcting according to collisions one frame and interpolating back the next.
+Additionally, given there is a heavy reliance on interpolation, the order in which each task is handled inside of `CameraTick()` is really important. Collisions are evaluated before interpolation, which on its own might cause the camera to run into wall after interpolating (leaving the collision adjustment to the next frame). What prevents it is that `ManageArmExpectedValue()` runs a second trace on the interpolated result before committing it:
 
-The same thing happens when we are resetting the camera, which is why **we leave the collision management for last and only once we have a definitive position do we actually adjust the camera**.
+- `UpdateForCameraState()` computes the target.
+- `ManageCameraCollisions()` sets the collision-adjusted target length.
+- `UpdateCameraContext()` interpolates and does a final corrective trace before committing.
 
 > 📝 **Note**
 >
@@ -79,7 +81,7 @@ The camera system is based on a map of `FCameraState`s that holds the configurat
 
 _* Requires another actor or component to work (other than the player)._
 
-Now, what does one of this states control? Well, here are the variables:
+Now, what does one of these states control? Well, here are the variables:
 
 | Variable | Type | Usage | Notes |
 |:---------|:----:|:-----:|:------|
@@ -98,20 +100,248 @@ Now, what does one of this states control? Well, here are the variables:
 |`InterpolationSpeed`|`float`| Handling movement. | — |
 |`bAfterCollisionDelay`|`bool`| Handling movement. | — |
 |`DelaySeconds`|`float`| Handling movement. | — |
-|`bCameraLag`|`bool`| Handling movement. | Wether to use the built in lag in the camera boom or not. |
+|`bCameraLag`|`bool`| Handling movement. | Whether to use the built in lag in the camera boom or not. |
 
 This seems like a whole lot — because it is — but I won't be going into it all at once. Let's try to focus instead on where each variable is used and how.
 
 # Calculating the Target Location
 
-- Offsets and so on
+Our design team was very clear about something: they wanted the system to be able to take advantage of the rule of thirds — they wanted the character to live on the left side of the screen (the opposite of the image below); specifically, the head of the player. This presented a couple of problems which (alongside the collisions) led most of the design decisions for the camera system.
+
+||
+|:---:|
+| ![Rule of thirds](https://upload.wikimedia.org/wikipedia/commons/0/04/Third-Rule.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled) |
+| Rule of thirds illustrated. |
+
+To understand this let's first understand what we need by looking back at the `CameraTick()`.
+
+```cpp
+void UCustomCameraSystemComponent::UpdateForCameraState(const float& DeltaSeconds)
+{
+  FCameraState State = GetCurrentCameraState();
+  TargetOffset = ComputeOffset(State);
+  FollowCamera->SetUseFieldOfViewForLOD(State.bUseFoVForLOD);
+}
+```
+
+This seems fairly simple. The only notable thing is `ComputeOffset()`, which serves as a way of translating the offset (a vector defining a screen position with values from `0.f` to `1.f`) and distance — found on the state — into the target offset the camera wants to interpolate towards (as you can see in the image below `ComputeOffset()`'s code block).
+
+```cpp
+FVector UCustomCameraSystemComponent::ComputeOffset(const FCameraState& CurrState)
+{
+  if (!IsValid(FGlobalPointers::MainController))
+  {
+    return FVector::ZeroVector;
+  }
+  
+  int32 ViewportWidth = 0, ViewportHeight = 0;
+  FGlobalPointers::MainController->GetViewportSize(ViewportWidth,ViewportHeight);
+  
+  const float DesiredPercentX = CurrState.bScreenRatioMirrored 
+                                ? (1.f - CurrState.DesiredScreenRatio.X) 
+                                : CurrState.DesiredScreenRatio.X;
+  const float DesiredPercentY = CurrState.DesiredScreenRatio.Y;
+  const float RadiansFoV = FMath::DegreesToRadians(FollowCamera->FieldOfView);
+
+  // Length relationship between FoV and Viewport
+  const float FocalLength = (ViewportWidth / 2.0f) / FMath::Tan(RadiansFoV / 2.0f);
+
+  // Perspective Projection supposing that Screen X is within 
+  // [-ViewportWidth/2 to +ViewportWidth/2] with 0 as the center
+  const float RawScreenOffsetY = (0.5f - DesiredPercentX) * ViewportWidth;
+  const float RawScreenOffsetZ = (DesiredPercentY - 0.5f) * ViewportHeight;
+    
+  // Adjust Offset to target distance
+  float TargetOffsetY = RawScreenOffsetY * (CurrState.Distance / FocalLength);
+  float TargetOffsetZ = RawScreenOffsetZ * (CurrState.Distance / FocalLength);
+  
+  return FVector(0.f, TargetOffsetY, TargetOffsetZ);
+}
+```
 
 ||
 |:---:|
 | ![Offset calculation](Offset.jpeg) |
 | Diagram showing the relation of the offset in the camera boom and the desired position for its origin on the screen. |
 
-## Switching between Targets
+```cpp
+void UCustomCameraSystemComponent::UpdateCameraContext(const float& DeltaSeconds)
+{
+  // We get our current state.
+  FCameraState CurrentCameraState = GetCurrentCameraState();
+  GetCameraBoom()->bEnableCameraLag = CurrentCameraState.bCameraLag;
+  
+  // Arm Length & Offset
+  FVector DesiredOffset = CurrentOffset;
+  float DesiredArmLength = GetCameraBoom()->TargetArmLength;
+
+  // Function that gets current interpolation according to active state 
+  // and always returns a value in between 0.f and 1.f
+  float Progress = InterpolateFloat();
+  
+
+  // If we are close enough, we just set it as the desired ones
+  DesiredOffset = CurrentOffset.Equals(TargetOffset)
+  ? TargetOffset
+  : FMath::Lerp(InterpolationStart_Offset,TargetOffset, Progress);
+
+  DesiredArmLength = FMath::IsNearlyEqual(GetCameraBoom()->TargetArmLength, TargetBoomLength)
+  ? TargetBoomLength
+  : FMath::Lerp(InterpolationStart_Dist,TargetBoomLength, Progress);
+
+  // `LookAt` handling 
+
+  // If we are done interpolating but not necessarily at the distance or offset 
+  // of the state (normally due to collisions), we set the starting location for our next
+  // interpolation
+  if (InterpTimer == 1.f)
+  {
+    InterpolationStart_Dist = GetCameraBoom()->TargetArmLength;
+    InterpolationStart_Offset = CurrentOffset;
+    GetCameraBoom()->bEnableCameraLag = false;
+  }
+  
+  ManageArmExpectedValue(DesiredArmLength, DesiredOffset);
+
+  // Focus Distance
+
+  // Timers
+}
+```
+
+> 📝 **Note**
+>
+> Most timers on the camera system are updated within `UpdateCameraContext`, just at the very end:
+>
+> ```cpp
+> void UCustomCameraSystemComponent::UpdateCameraContext(const float& DeltaSeconds)
+> {
+>   //...
+>
+>   if (bYawAssistance)
+>   {
+>     YawAssistanceTimer -= DeltaSeconds;
+>   }
+>   if (CurrentCameraState.bAfterCollisionDelay)
+>   {
+>     DelayedCollisionTimer -= DeltaSeconds;
+>   }
+>   const bool bCollisionDelayResolved = !CurrentCameraState.bAfterCollisionDelay || DelayedCollisionTimer <= 0.f;
+>   if (InterpTimer < 1.f && (bCollisionDelayResolved || InterpolationStart_Dist > TargetBoomLength))
+>   {
+>     InterpTimer += DeltaSeconds * CurrentCameraState.InterpolationSpeed;
+>     InterpTimer = FMath::Clamp(InterpTimer, 0.f, 1.f); // Will be used in `InterpolateFloat()`
+>   }
+> }
+> ```
+
+Now that we have updated the context of the system, we apply those changes to actually calculate what distance we are aiming for; and that's what we do with `ManageArmExpectedValue()`.
+
+```cpp
+void UCustomCameraSystemComponent::ManageArmExpectedValue(const float ExpectedDistance, FVector ExpectedOffset) 
+{
+  FCameraState CurrState = GetCurrentCameraState();
+
+  // Where would the camera end up with the interpolated values?
+  const FVector ComputedExpectedOffset = GetOffsetFromDistance(ExpectedDistance, ExpectedOffset);
+  const FVector ExpectedEnd = 
+    GetCameraBoom()->GetComponentLocation() + ComputedExpectedOffset - GetCameraBoom()->GetTargetRotation().Vector() * ExpectedDistance;
+  
+  // Is anything between the current camera position and the expected one?
+  FHitResult CorrectiveHit;
+  const bool bGoingForward = ExpectedDistance < GetCameraBoom()->TargetArmLength;
+  const bool bCollisionDelayResolved = !CurrState.bAfterCollisionDelay || DelayedCollisionTimer <= 0.f;
+  bool bCorrectiveCollision = UKismetSystemLibrary::SphereTraceSingle(
+    GetWorld(),
+    FollowCamera->GetComponentLocation(),
+    ExpectedEnd,
+    CameraCollisionRadius * 1.f,
+    ETraceTypeQuery::TraceTypeQuery1,
+    true,
+    IgnoredActorsCamera,
+    EDrawDebugTrace::None,
+    CorrectiveHit,
+    true);
+
+  // Blocked while growing back? Restart delay and interpolation from here
+  if (bCorrectiveCollision && !bGoingForward)
+  {
+    if (CurrState.bAfterCollisionDelay)
+    {
+      DelayedCollisionTimer = CurrState.DelaySeconds;
+    }
+    InterpolationStart_Dist = GetCameraBoom()->TargetArmLength;
+    InterpolationStart_Offset = CurrentOffset;
+    InterpTimer = 0.f;
+  }
+  
+  // Getting closer is always accepted, with a minimum length so we don't end 
+  // up inside the player
+  if (bGoingForward)
+  {
+    GetCameraBoom()->TargetArmLength = ExpectedDistance < CameraCollisionRadius / 4.f ? CameraCollisionRadius / 4.f : ExpectedDistance;
+    CurrentOffset = ExpectedOffset;
+  }
+  
+  // Growing back only if the path is clear and the delay is over (otherwise, 
+  // keep last frame's values)
+  else if (!bCorrectiveCollision && bCollisionDelayResolved)
+  {
+    GetCameraBoom()->TargetArmLength = ExpectedDistance;
+    CurrentOffset = ExpectedOffset;
+  }
+
+  // Apply the committed offset in world space
+  FVector NewProcessedOffset = GetOffsetFromDistance(GetCameraBoom()->TargetArmLength, CurrentOffset);
+  GetCameraBoom()->TargetOffset = NewProcessedOffset;
+}
+```
+
+As you can see, `GetOffsetFromDistance()` is used once to predict and once to apply. Why? 
+
+- First, our offset is still in camera terms (side and height), while the Spring Arm’s `TargetOffset` is in world space, so the lateral part has to follow the arm’s yaw.
+- Second, the offset was computed for the state’s full `Distance`; if a wall pulls the arm closer, the offset has to shrink with it to keep the head in the same screen position.
+
+```cpp
+FVector UCustomCameraSystemComponent::GetOffsetFromDistance(const float BoomDistance, const FVector TheoreticalOffset) const
+{
+  if (!IsValid(FGlobalPointers::MainController))
+  {
+    return TheoreticalOffset;
+  }
+
+  // Shrink the offset with the arm to keep the head in the same screen position
+  // (only once we are at the target offset, not while interpolating)
+  const float Scale = TheoreticalOffset.Equals(TargetOffset) ? FMath::Min(1.f, BoomDistance / GetCurrentCameraState().Distance) : 1.f;
+  const float ExpectedLateralOffset = TheoreticalOffset.Y * Scale;
+  const float ExpectedHeightOffset = TheoreticalOffset.Z * Scale;
+      
+  // Rotate the lateral offset to follow the arm's yaw (perpendicular to its forward on the XY plane)
+  // and keep the height in world Z
+  //
+  // The forward vector's XY is not normalized, so the lateral offset shrinks with pitch.
+  // Uncomment `.GetSafeNormal2D()` bellow if you'd rather that not happen.
+  FVector Forward2D = GetCameraBoom()->GetTargetRotation().Vector()/*.GetSafeNormal2D()*/;
+  FVector OldMethod = FVector(
+    ExpectedLateralOffset * -Forward2D.Y,
+    ExpectedLateralOffset * Forward2D.X,
+    ExpectedHeightOffset);
+
+  return OldMethod;
+}
+```
+
+> 📝 **Note**
+>
+> There was an alternative implementation to `GetOffsetFromDistance`; however, I did not find much success with it. I'll leave it here just in case you want to check it out (it is not as tested as the _"`OldMethod`"_):
+>
+> ```cpp
+>  FRotator TargetRot = FGlobalPointers::MainController->GetControlRotation();
+>  FVector Right = FRotationMatrix(TargetRot).GetUnitAxis(EAxis::Y); // Right vector
+>  FVector Up = FollowCamera->GetUpVector(); // Right vector
+>  FVector NewMethod = (Right * ExpectedLateralOffset) + /*(FVector::UpVector * 2.f * ExpectedHeightOffset -*/ (Up * ExpectedHeightOffset);
+>  return NewMethod
+> ```
 
 > 📝 **Note**
 >
@@ -129,8 +359,8 @@ Let me begin by showing you how the player actually controls the camera by check
 // APlayerCharacter.cpp
 
 // On the constructor we bind the functions to an event
-EnhancedInput->BindAction(FInputAssets::LookAction,     ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
-EnhancedInput->BindAction(FInputAssets::LookAction,     ETriggerEvent::Completed, this, &APlayerCharacter::StopLook);
+EnhancedInput->BindAction(FInputAssets::LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
+EnhancedInput->BindAction(FInputAssets::LookAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopLook);
 
 void APlayerCharacter::Look(const FInputActionValue& Value)
 {
@@ -153,7 +383,7 @@ void APlayerCharacter::StopLook(const FInputActionValue& Value)
 
 ```
 
-If you are familiar with the player camera control inside Unreal Engine's 3D template, you may notice how the Look() function is not too different to the default builtin one. The big differences are that we process the input vector directly from the controller with `GetAdjustedLookVector()`, and then we apply the aim assist related modifiers.
+If you are familiar with the player camera control inside Unreal Engine's 3D template, you may notice how the `Look()` function is not too different to the default builtin one. The big differences are that we process the input vector directly from the controller with `GetAdjustedLookVector()`, and then we apply the aim assist related modifiers.
 
 > 📝 **Note**
 >
@@ -161,12 +391,15 @@ If you are familiar with the player camera control inside Unreal Engine's 3D tem
 
 ## Ramp up and slow down
 
-How we ramp up and slow down the camera's look vector is clear once we look at the implementation of `GetAdjustedLookVector()` and `GetDeceleratingLookVector()`.
+The acceleration and deceleration behavior becomes clearer when we look at the implementation of `GetAdjustedLookVector()` and `GetDeceleratingLookVector()`.
 
 ```cpp
+// Note: the acceleration ramp below advances per frame, not per second,
+// so ramp duration depends on frame rate. Gamepad input is only frame rate
+// independent if the Input Action applies a Scale By Delta Time modifier.
 FVector2D UCustomCameraSystemComponent::GetAdjustedLookVector(FString DeviceType, FVector2D LookAxisVector)
 {
-  // Let's check first wether we can move the camera
+  // Let's check first whether we can move the camera
   if (GetCurrentCameraStateKey() == ECameraStateKey::LOOKAT)
   {
     return FVector2D::ZeroVector;
@@ -180,20 +413,19 @@ FVector2D UCustomCameraSystemComponent::GetAdjustedLookVector(FString DeviceType
     SetCameraInputMotion(CurrentAccelerationInput < 1 ? ECameraInputSpeed::ACCELERATING : ECameraInputSpeed::PEAKED);
   }
 
-
   FCameraMultipliers ActiveMultipliers = CameraMultipliers[FName(DeviceType)];
 
   // Apply acceleration modification to original input
   float ResultX = LookAxisVector.X * CurrentAccelerationInput;
   float ResultY = LookAxisVector.Y * CurrentAccelerationInput;
 
-  // Apply designer custom sensibility ramp up curve, if there is one for this device
-  if (ActiveMultipliers.bSensibilityFitsCurve)
+  // Apply designer custom sensitivity ramp up curve, if there is one for this device
+  if (ActiveMultipliers.bSensitivityFitsCurve)
   {
     if (IsValid(ManualYawCurve) && IsValid(ManualPitchCurve))
     {
-      ResultX = ManualYawCurve->GetFloatValue(FMath::Abs(ResultX)) * (ResultX/FMath::Abs(ResultX));
-      ResultY = ManualPitchCurve->GetFloatValue(FMath::Abs(ResultY)) * (ResultY/FMath::Abs(ResultY));
+      ResultX = ResultX ? ManualYawCurve->GetFloatValue(FMath::Abs(ResultX)) * (ResultX/FMath::Abs(ResultX)) : 0.f;
+      ResultY = ResultY ? ManualPitchCurve->GetFloatValue(FMath::Abs(ResultY)) * (ResultY/FMath::Abs(ResultY)) : 0.f;
     }
     else
     {
@@ -202,8 +434,8 @@ FVector2D UCustomCameraSystemComponent::GetAdjustedLookVector(FString DeviceType
   }
 
   // Apply `ActiveMultipliers` to input
-  ResultX *= (ActiveMultipliers.bInvertYaw ? -1 : 1) * ActiveMultipliers.SensibilityX;
-  ResultY *= (ActiveMultipliers.bInvertPitch ? -1 : 1) * ActiveMultipliers.SensibilityY;
+  ResultX *= (ActiveMultipliers.bInvertYaw ? -1 : 1) * ActiveMultipliers.SensitivityX;
+  ResultY *= (ActiveMultipliers.bInvertPitch ? -1 : 1) * ActiveMultipliers.SensitivityY;
 
   if (GetCurrentCameraStateKey() == ECameraStateKey::AIM)
   {
@@ -254,7 +486,7 @@ void APlayerCharacter::Tick(const float DeltaTime)
 }
 ```
 
-On stop look, we set the motion input to `DECELERATING`; then, on the player's tick, we decelerate until we stop completely the same way we accelerated before (this time handled by `GetDeceleratingLookVector()`).
+On `StopLook()`, we set the motion input to `DECELERATING`; then, on the player's tick, we decelerate until we stop completely using the same way it accelerated — only this time it's done in reverse (this time handled by `GetDeceleratingLookVector()`). The system retains `PreviousInputAdjust` and scales that vector down as the acceleration factor decreases.
 
 ```cpp
 FVector2D UCustomCameraSystemComponent::GetDeceleratingLookVector(float DeltaTime)
@@ -271,11 +503,10 @@ You might have noticed on the previous code snippets, that at a certain point we
 
 | Variable | Description |
 |:--------:|:------------|
-| `SensibilityRange` | Min to max value the input can be multiplied by. |
-| `SensibilityX` | Used to modify the strength of the input on the X axis. |
-| `SensibilityY` | Used to modify the strength of the input on the Y axis. |
-| `bSensibilityFitsCurve` | Wether to use the provided curves instead of a plain multiplier. |
-| `bSensibilityFitsCurve` | Wether to use the provided curves instead of a plain multiplier. |
+| `SensitivityRange` | Min to max value the input can be multiplied by. |
+| `SensitivityX` | Used to modify the strength of the input on the X axis. |
+| `SensitivityY` | Used to modify the strength of the input on the Y axis. |
+| `bSensitivityFitsCurve` | Whether to use the provided curves instead of a plain multiplier. |
 | `AimMultiplierRange` | Just as before but now depending on how the camera is being used by the player. |
 | `AimMultiplier` | Used to modify the strength of the input while aiming. |
 | `DefaultMultiplier` | Used to modify the strength of the input while moving the camera normally. |
@@ -286,11 +517,11 @@ You might have noticed on the previous code snippets, that at a certain point we
 
 | Related Variables          | Description               |
 |:--------------------------:|:--------------------------|
-| `CameraMoveAssistStrength` | How much force should de automatic adjustment use. |
+| `CameraMoveAssistStrength` | How much force should the automatic adjustment use. |
 | `YawAssistanceTimer`       | Internal countdown timer. It is set to delay whenever the camera stays `STATIC` while the Player is on motion. |
 | `YawAssistanceDelay`       | How much to wait until we begin applying the camera assistance. |
 
-When active, the camera's Yaw movement moves complementary to player's movement if there no camera control input is made. The following function is called inside of `APlayerCharacter::Move()`.
+When active, the camera's Yaw movement moves complementary to player's movement if there is no camera control input made. The following function is called inside of `APlayerCharacter::Move()`.
 
 ```cpp
 void UCustomCameraSystemComponent::MoveAssistance(const FVector2D& MoveAxisVector, const bool bMoveControlledByCover) const
@@ -314,7 +545,7 @@ void UCustomCameraSystemComponent::MoveAssistance(const FVector2D& MoveAxisVecto
 
 > 📝 **Note**
 >
-> The camera assistance can be toggle by setting  `bYawAssistance` — false by default.
+> The camera assistance can be toggled by setting  `bYawAssistance` — false by default.
 
 ## Resetting the Camera
 
@@ -348,7 +579,7 @@ void UCustomCameraSystemComponent::CameraTick(const float& DeltaSeconds)
   
   if (bCameraIsResetting)
   {
-    ResetCamProgress(GetWorld()->GetDeltaSeconds());
+    ResetCamProgress(DeltaSeconds);
   }
 
   //...
@@ -368,22 +599,26 @@ void UCustomCameraSystemComponent::ResetCamProgress(const double& DeltaSeconds)
   }
 
   // Current Rotation
+  FRotator TargetRot(0.f, GetOwner()->GetActorRotation().Yaw, 0.f);
+  FQuat TargetQuat = TargetRot.Quaternion();
+
   FRotator ControlRot = FGlobalPointers::MainController->GetControlRotation();
   FQuat ControlQuat = ControlRot.Quaternion();
 
   // Difference between rotations
-  const float AngularDistance = FMath::RadiansToDegrees(UKismetMathLibrary::Quat_AngularDistance(ControlQuat, ControlQuat));
+  const float AngularDistance = FMath::RadiansToDegrees(UKismetMathLibrary::Quat_AngularDistance(ControlQuat, TargetQuat));
   const float AngularThreshold = 1.0f;
 
   if (AngularDistance > AngularThreshold)
   {
     // Interpolate
-    FQuat InterpolatedQuat = FQuat::Slerp(ControlQuat, ControlQuat, DeltaSeconds * ResetStepSize);
-        FGlobalPointers::MainController->SetControlRotation(InterpolatedQuat.Rotator());
+    FQuat InterpolatedQuat = FQuat::Slerp(ControlQuat, TargetQuat, DeltaSeconds * ResetStepSize);
+    FGlobalPointers::MainController->SetControlRotation(InterpolatedQuat.Rotator());
   }
   else
   {
-    // Restore input
+    // Snap rotation and restore input
+    FGlobalPointers::MainController->SetControlRotation(TargetRot);
     FGlobalPointers::MainController->EnableInput(FGlobalPointers::MainController);
     bCameraIsResetting = false;
   }
@@ -392,15 +627,16 @@ void UCustomCameraSystemComponent::ResetCamProgress(const double& DeltaSeconds)
 
 ## Other options
 
-There are many more functions related with customizing the player experience (wether by the player, the designers or by other systems). As getting into them would be a bit too much, I'll gather them here for you with a little explanation on how they work and how they are used — excluding some getters and setters.
+There are many more functions related with customizing the player experience (whether by the player, the designers or by other systems). As getting into them would be a bit too much, I'll gather them here for you with a little explanation on how they work and how they are used — excluding some getters and setters.
 
 | Function | Entry Variables | Description |
 |:--------:|:---------------:|:------------|
-| `UpdateCurrentControlSensitivity (FString&, float, bool)` | `DeviceType`, `NewValue`, `bHorizontal` | When updating the sensibility, we modify the multiplier but ensuring it is always within the provided range. |
-| `UpdateModifier (FString&, EModifierType, float)`  | `DeviceType`, `Modifier`, `NewValue` | We change the given `DeviceType` multiplier related to the provided modifier — for example, keyboard multiplier related to aiming. |
+| `UpdateCurrentControlSensitivity (FString&, float, bool)` | `DeviceType`, `NewValue`, `bHorizontal` | When updating the sensitivity, we modify the multiplier but ensuring it is always within the provided range. |
+| `UpdateForAttachment (FVector&)` | `OriginalLocation` | Used when changing between states — since the attachment might have change locations — or if we want to manually adjust. |
+| `UpdateModifier (FString&, EModifierType, float)` | `DeviceType`, `Modifier`, `NewValue` | We change the given `DeviceType` multiplier related to the provided modifier — for example, keyboard multiplier related to aiming. |
 | `UpdateModifier (EModifierType, TArray<float>)` | `Modifier`, `NewValues` | We change all multipliers related to the provided modifier — for example, every multiplier related to aiming. |
 | `SetCameraStateShoulder (ECameraStateKey, bool)` | `StateKey`, `InvertedShoulder` | Sets whether the shoulder (offset) should be the opposite of the default (mirrored) for the provided state (and resets related timers). |
-| `SetCameraStateOffsetValue (ECameraStateKey, FVector2D)` | `StateKey`, `Ratio` | Sets the offset for the provided state (and resets related timers). this is used on other systems. |
+| `SetCameraStateOffsetValue (ECameraStateKey, FVector2D)` | `StateKey`, `Ratio` | Sets the offset for the provided state (and resets related timers). This is used on other systems. |
 
 # When the Camera bumps into something
 
@@ -411,8 +647,9 @@ void UCustomCameraSystemComponent::ManageCameraCollisions()
 {
   FCameraState State = GetCurrentCameraState();
 
+  // Trace from spring arm's origin toward the expected camera location
   const FVector Start = GetCameraBoom()->GetComponentLocation();
-  const FVector End	= Start + GetCameraBoom()->TargetOffset - GetCameraBoom()->GetTargetRotation().Vector() * GetCameraBoom()->TargetArmLength;
+  const FVector End = Start + GetCameraBoom()->TargetOffset - GetCameraBoom()->GetTargetRotation().Vector() * GetCameraBoom()->TargetArmLength;
 
   CameraHits.Empty();
   bool bHasCollided = UKismetSystemLibrary::SphereTraceMulti(
@@ -429,18 +666,18 @@ void UCustomCameraSystemComponent::ManageCameraCollisions()
 
   if (bHasCollided)
   {
-    // Process collision
+    // Process relevant hits
   }
   else
   {
-    // If we ain't hitting nothing, we probably want to go back.
+    // We grow back
     TargetBoomLength = State.Distance;
     GetCameraBoom()->bDoCollisionTest = false;
   }
 }
 ```
 
-> **Note**
+> 📝 **Note**
 >
 > A few actors to be ignored are set up and gathered on begin play. To do this, I get any actor tagged with _"Camera Ignore"_ within the level on `BeginPlay()`.
 >
@@ -476,6 +713,7 @@ UCustomCameraSystemComponent::ManageCameraCollisions()
       DelayedCollisionTimer = State.DelaySeconds;
     }
 
+    // Restart the interpolation from wherever the arm currently is
     if (!FMath::IsNearlyEqual(InterpolationStart_Dist, GetCameraBoom()->TargetArmLength))
     {
       InterpolationStart_Dist = GetCameraBoom()->TargetArmLength;
@@ -483,36 +721,131 @@ UCustomCameraSystemComponent::ManageCameraCollisions()
     InterpolationStart_Offset = CurrentOffset;
     
     FHitResult SynthesizedHit;
-    SynthesizedHit.Normal		= FVector::ZeroVector;
-    SynthesizedHit.Location		= FVector::ZeroVector;
-    SynthesizedHit.ImpactPoint	= FVector::ZeroVector;
+    SynthesizedHit.Normal = FVector::ZeroVector;
+    SynthesizedHit.Location = FVector::ZeroVector;
+    SynthesizedHit.ImpactPoint = FVector::ZeroVector;
 
     for (const FHitResult& Hit : CameraHits)
     {
-      SynthesizedHit.Normal		+= Hit.Normal;
-      SynthesizedHit.Location		+= Hit.Location;
-      SynthesizedHit.ImpactPoint	+= Hit.ImpactPoint;
+      SynthesizedHit.Normal += Hit.Normal;
+      SynthesizedHit.Location += Hit.Location;
+      SynthesizedHit.ImpactPoint += Hit.ImpactPoint;
     }
 
-    SynthesizedHit.Normal		/= CameraHits.Num();
-    SynthesizedHit.Location		/= CameraHits.Num();
-    SynthesizedHit.ImpactPoint	/= CameraHits.Num();
+    // Process collisions into the mean to get the most significant collision
+    SynthesizedHit.Normal /= CameraHits.Num();
+    SynthesizedHit.Location /= CameraHits.Num();
+    SynthesizedHit.ImpactPoint /= CameraHits.Num();
     
+    // There might be some problems for this approach:
+    //
+    // Two surfaces with opposing normals can produce an average normal that doesn't meaningfully represent 
+    // either surface; however, for a case like that, where the camera is sandwiched between them, our results 
+    // would suggest us a hit from behind which is the same result we already expect (moving forward).
+
     EvaluateCollision(SynthesizedHit);
   }
 }
-
 ```
 
-||
-|:---:|
-| ![Collisions structure](Collisions_01.jpeg) | 
-| . |
+As you can see, we process the hits into a single one and then pass it to `EvaluateCollision`, which checks which collision type we are: side, back or bottom (top is either handled by Spring Arm's `bDoCollisionTest` or gets classified as back collision).
 
 ||
 |:---:|
-| ![Collisions example](Collisions_02.jpeg) | 
-| . |
+| ![Collisions structure](Collisions_02.jpeg) | 
+| Diagram illustrating collision types. |
+
+```cpp
+void UCustomCameraSystemComponent::EvaluateCollision(const FHitResult& CollisionResult)
+{
+  const FVector HitNormal = CollisionResult.Normal;
+  const FCameraState CurrState = GetCurrentCameraState();
+
+  const float SideDot = FVector::DotProduct(FollowCamera->GetRightVector().GetSafeNormal(), HitNormal);
+  const float ForwardDot = FVector::DotProduct(FollowCamera->GetForwardVector().GetSafeNormal(), HitNormal);
+  const float UpDot = FVector::DotProduct(FollowCamera->GetUpVector().GetSafeNormal(), HitNormal);
+
+  const float ProcessedSide = FMath::Abs(SideDot)/CurrState.SideHitThreshold;
+  const float ProcessedFwd = ForwardDot/CurrState.WallHitThreshold;
+  const float ProcessedUp = UpDot/CurrState.BottomHitThreshold;
+
+  // Checking for most significant collision type
+  bool bWallBehind = ProcessedFwd > ProcessedUp && ProcessedFwd > ProcessedSide;
+  bool bBottomCollision = !bWallBehind && ProcessedUp > ProcessedSide;
+  bool bSideCollision = !(bWallBehind || bBottomCollision);
+
+  if (bWallBehind || bBottomCollision || (bSideCollision && GetCurrentCameraStateKey() != ECameraStateKey::COVER))
+  {
+    CameraCorrectiveMovement(CollisionResult);
+  }
+  else if (bSideCollision)
+  {
+
+    const bool SideCollisionFromRight = SideDot > 0.f; // Used once ClampLateralOffset is swapped in
+    CameraCorrectiveMovement(CollisionResult);
+  }
+}
+```
+
+> 📝 **Note**
+>
+> Inside `else if (bSideCollision)`, `CameraCorrectiveMovement(CollisionResult)` should be swapped `ClampLateralOffset(TargetOffset, CollisionResult.Location, SideCollisionFromRight)`. However, due to time constraints, there was no real time to actually test it. Here is what was prototyped:
+> ```cpp
+>void UCustomCameraSystemComponent::ClampLateralOffset(FVector& DesiredOffset, const FVector& HitLocation, const bool FromRight) const
+>{
+>  const FVector CameraLocation = FollowCamera->GetComponentLocation();
+>  const FVector CameraRight = FollowCamera->GetRightVector();
+>  const FVector ToCollision = HitLocation - CameraLocation;
+>
+>  // Clamp Lateral offset to side collision hit
+>  const float HitRightDist = FVector::DotProduct(ToCollision, CameraRight);
+>  const float DesiredRightDist = FVector::DotProduct(DesiredOffset, CameraRight);
+>  const float Excess = DesiredRightDist - HitRightDist;
+>
+>  // Only if received the collision for the shoulder offset side
+>  if ((DesiredRightDist > 0 && Excess > 0) || (DesiredRightDist < 0 && Excess < 0))
+>  {
+>    DesiredOffset -= CameraRight * Excess;
+>  }
+>}
+>```
+
+And lastly, we make the adjustment to the length size of the Spring Arm from that collision result.
+
+```cpp
+void UCustomCameraSystemComponent::CameraCorrectiveMovement(const FHitResult& Hit)
+{
+  // Projecting Hit Location into Spring Arm Vector
+  const FVector End(GetCameraBoom()->GetComponentLocation() + GetCameraBoom()->TargetOffset - GetCameraBoom()->GetTargetRotation().Vector() * GetCameraBoom()->TargetArmLength);
+  const FVector OriginVector(End - GetCameraBoom()->GetComponentLocation());
+  const FVector HitVector(Hit.ImpactPoint - (OriginVector.GetSafeNormal() * CameraCollisionRadius) - GetCameraBoom()->GetComponentLocation());
+  const FVector ProjectedPoint(GetCameraBoom()->GetComponentLocation() + FVector::DotProduct(HitVector, OriginVector) / FVector::DotProduct(OriginVector, OriginVector) * OriginVector);
+
+  // Setting Arm Length as distance to Projected Point
+  float Dist2Point = (ProjectedPoint - GetCameraBoom()->GetComponentLocation()).Size();
+  if (TargetBoomLength > Dist2Point)
+  {
+    // Reset interpolation if we are close enough to the state default
+    if (FMath::IsNearlyEqual(GetCurrentCameraState().Distance, TargetBoomLength))
+    {
+      InterpTimer = 0.f;
+    }
+
+    // Threshold indicates whether to use, `Dist2Point` directly 
+    // or process radius into usable length
+    if (Dist2Point > 40.f)
+    {
+      TargetBoomLength = Dist2Point;
+    }
+    else
+    {
+      TargetBoomLength = CameraCollisionRadius / 4.f;
+    }
+  }
+  // Backup collision test from the builtin Spring Arm Component
+  GetCameraBoom()->bDoCollisionTest = true;
+}
+```
 
 # Other Stuff
 
@@ -679,7 +1012,7 @@ void UCustomCameraSystemComponent::UpdateCameraContext(const float& DeltaSeconds
 
 > 📝 **Note**
 >
-> You may have noticed that, on many of this code snippets, we use the namespace `FGlobalPointers`. While this might not be advised, during development we realized that many systems where dependant on accessing the same classes over and over. In order to keep things readable and given we weren't at a point in which we could go refactor our systems, we came to the agreement of using this namespace.
+> You may have noticed that, on many of these code snippets, we use the namespace `FGlobalPointers`. While this might not be advised, during development we realized that many systems were dependent on accessing the same classes over and over. In order to keep things readable and given we weren't at a point in which we could go refactor our systems, we came to the agreement of using this namespace.
 >
 > These common pointers are:
 >
@@ -705,9 +1038,9 @@ bool UCustomCameraSystemComponent::IsOutsideFrustum(const AActor* Actor, const f
   const FVector Difference = (Actor->GetActorLocation() - GetFollowCamera()->GetComponentLocation()).GetSafeNormal();
 
   const float DotProduct = FVector::DotProduct(Forward, Difference);
-  const float FrustumLimit = 1.0f - (Player->GetCameraSystemComponent()->GetFieldOfView() / 360.0f) - Tolerance;
-
-  return (DotProduct < FrustumLimit);
+  const float HalfFoVRadians = FMath::DegreesToRadians(GetFollowCamera()->FieldOfView * 0.5f);
+  
+  return (DotProduct < (FMath::Cos(HalfFoVRadians) - Tolerance));
 }
 ```
 
@@ -716,9 +1049,13 @@ bool UCustomCameraSystemComponent::IsOutsideFrustum(const AActor* Actor, const f
 > My approach is more _mathy_ than needed, one could simply use:
 >
 > ```cpp
-> FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues())
-> FSceneView* SceneView = LocalPlayer->(&ViewFamily, ViewLocation, ViewRotation, Player->ViewportClient->Viewport);
-> return SceneView->ViewFrustum.IntersectSphere(Element->GetLocation(), Element->GetRadius());
+> FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(
+>   LocalPlayer->ViewportClient->Viewport,
+>   GetWorld()->Scene,
+>   LocalPlayer->ViewportClient->EngineShowFlags)
+>   .SetRealtimeUpdate(true));
+> FSceneView* SceneView = LocalPlayer->CalcSceneView(&ViewFamily, ViewLocation, ViewRotation, Player->ViewportClient->Viewport);
+> return !SceneView->ViewFrustum.IntersectSphere(Element->GetLocation(), Element->GetRadius());
 > ```
 >
 > Which is a builtin solution in Unreal Engine.
