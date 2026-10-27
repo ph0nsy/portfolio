@@ -7,6 +7,7 @@ import {materialDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 
 import { useDocumentDescription, useDocumentImage, useDocumentTitle } from "../hooks/useDOM";
+import { getReadTimeFromFileUrl } from "../utils/readTime";
 import BackLink from "../custom_components/BackLink";
 import Modal from '../custom_components/Modal';
 import NotFoundPage from "./NotFoundPage";
