@@ -9,13 +9,10 @@ Here are the steps it took to get something usable; including, of course, what I
 > - **GPIO** (General Purpose Input/Output, a pin software can read or drive).
 > - **SoC** (System on Chip).
 > - **ADC** (Analog to Digital Converter, turns a voltage into a number).
-> - **MMIO** (Memory Mapped I/O, hardware registers that show up at memory addresses instead of a separate instruction set).
 > - **IIO** (Industrial I/O, the kernel subsystem for ADCs and similar sensors).
-> - **PMIC** (Power Management IC, a companion chip handling power, sometimes the power button too).
 > - **DTS**/**DTSI** (Device Tree Source / Source Include, the hardware description files this whole post lives in).
-> - **TRM** (Technical Reference Manual, the register-level programming datasheet vendors sometimes publish, and sometimes don't).
 
-## What's running?
+# What's running?
 
 To begin, even if we know what our machine is running, it is good to check; don't just assume the latest published kernel source matches what's actually running on the device. Cross compiling a module against the wrong source tree will give us something that either won't load at all, or loads and behaves wrong — even if we don't notice at first. Everything we'll do afterwards depends on getting this right, so checking now will save us a lot of headaches in the future.
 
@@ -35,7 +32,7 @@ Linux rg351mp 4.4.189 #3 SMP Wed Oct 13 23:24:26 EDT 2021 aarch64 aarch64 aarch6
 Linux version 4.4.189 (dev@rk3326-dev) (gcc version 6.3.1 20170404 (Linaro GCC 6.3-2017.05))
 ```
 
-> **Note**
+> 📝 **Note**
 >
 > To do this step — as well as most of the ones moving forwards — you will need to be able to connect your 
 > R36S into the same network as your machine (**this post assumes a Linux desktop or Virtual Machine**) and then  
@@ -48,7 +45,7 @@ Linux version 4.4.189 (dev@rk3326-dev) (gcc version 6.3.1 20170404 (Linaro GCC 6
 
 This result tells us two things. The **hostname reads `rg351mp`, not `r36s`, even though this is genuinely an R36S**. This is normal, because ArkOS ships one shared image across the whole [RK3326 family](https://handheldwiki.com/chip/rockchip-rk3326/), since they're all built on the same silicon. And the other, more useful, information: **the GCC version string, `6.3.1 20170404 (Linaro GCC 6.3-2017.05)`**. That string is the key to finding the right toolchain later, and it's worth grabbing now rather than guessing later.
 
-## Environment set up and dead links
+# Environment set up and dead links
 
 With the GCC string in hand, finding the matching source tree was mostly a matter of checking ArkOS's own GitHub wiki, which pointed to christianhaitian/linux, branch rg351. A [community mirror](https://github.com/lcdyk0517/arkos.bsp.4.4) of the same tree had build instructions that named the exact toolchain: `gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu, hosted at releases.linaro.org`.
 
@@ -66,7 +63,7 @@ How do we solve this then? Well, we are in luck! This specific Linaro build turn
 sudo git clone --depth=1 https://github.com/rockchip-android/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu.git /opt/toolchains/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu
 ``` 
 
-> **Note** 
+> 📝 **Note**
 >
 > Don't pin a specific `-b branchname` unless you've actually checked what branch that particular
 > mirror uses, different forks named their default branch differently despite holding identical 
@@ -83,14 +80,14 @@ aarch64-linux-gnu-gcc -v
 
 The last line of that output should read exactly: `gcc version 6.3.1 20170404 (Linaro GCC 6.3-2017.05)`. If it doesn't, we've got ourselves a toolchain that doesn't match, that mismatch may produce a kernel that builds cleanly but fails module version checks on the device later. We should check on another repository or branch to see find the proper one.
 
-> **Note**
+> 📝 **Note**
 >
 > If an export `PATH=...` in the same shell session is written without the trailing `:$PATH`, it will silently 
 > replace all of `PATH` instead of extending it wiping out `/usr/bin`, `/bin`, and even `sudo`.
 >
 > I suggest putting these three exports in `~/.bashrc` once, rather than retyping them every session.
 
-> **Further Reading**
+> 📚 **Further Reading**
 >
 > The whole matching a device's own `uname -a`/GCC string before building anything,
 > seems to be an established practice across several embedded communities.
@@ -106,7 +103,7 @@ The last line of that output should read exactly: `gcc version 6.3.1 20170404 (L
 > ArkOS's own [GitHub wiki](https://github.com/christianhaitian/arkos/wiki) and the [`christianhaitian/linux`](https://github.com/christianhaitian/linux) kernel fork itself were the actual entry points for 
 > this specific board.
 
-## Build the kernel
+# Build the kernel
 
 Before writing any driver code, the goal here was proving the whole pipeline works, source, toolchain, build, end to end, against the kernel, with nothing custom yet.
 
@@ -135,7 +132,7 @@ Output: 4.4.189
 
 Success! An exact match to the device's `uname -a`, with no `-dirty` suffix or anything else appended. Now we have confirmed that the source tree, defconfig, and toolchain were all correct.
 
-## Hello module
+# Hello module
 
 Before writing anything that has to do with hardware, a bare `printk`, _Hello World_-kind of module helps us verify the entire chain: cross compile, transfer, load — once again. We create the following ***C*** file.
 
@@ -188,7 +185,7 @@ file hello.ko
 scp hello.ko ark@192.168.1.50:~/
 ```
 
-> **Note**
+> 📝 **Note**
 >
 > We can get the handhelds's IP either when _Enabling Remote Services or on the _WiFi Settings_.
 
@@ -202,14 +199,14 @@ sudo rmmod hello
 
 We expect to see "hello_module: loaded" and then "hello_module: unloaded" in `dmesg` as proof everything works together.
 
-> **Note**
+> 📝 **Note**
 >
 > This happened to me, so I'm going to point it out just in case. Unlike what you might be used to,
 > writing `printk(KERN_INFO, "message\n")` with a comma is wrong, producing a too many arguments for
 > format [-Wformat-extra-args] warning. KERN_INFO isn't a function argument, it's meant to concatenate 
 > directly onto the format string as one literal `printk(KERN_INFO "message\n")`.
 
-## Finding the board's device tree
+# Finding the board's device tree
 
 GPIO pins and other peripherals are wired in ways fixed at hardware design time, so something has to tell the kernel what's physically connected and to what. And that something is the device tree: a `.dts` (or shared `.dtsi`) source file, compiled by `dtc` into a `.dtb` binary the bootloader hands to the kernel at boot. We can see the `.dts` files on our Linux kernel by searching for the board name on the kernel's directory:
 
@@ -247,13 +244,13 @@ gpio-keys {
 
 Let's look at the shape of the example node. `compatible` is the string a driver's own `of_match_table` matches against at boot, it's the link between a device tree node and the ***C*** code. `gpio2` here is a label, a name defined elsewhere that this node references by pointer handle (`&gpio2`), pointing at the actual GPIO controller node this button's pin lives on. `RK_PA0` is a macro (from `dt-bindings/pinctrl/rockchip.h`) meaning "port A, pin 0" on that controller.
 
-> **Further reading**
+> 📚 **Further reading**
 >
 > - [Linux and the Devicetree](https://www.kernel.org/doc/html/latest/devicetree/usage-model.html), the in-kernel documentation on how Linux actually consumes this data at boot.
 > - eLinux's [Device Tree Usage](https://elinux.org/Device_Tree_Reference) page, more example driven, referenced directly from the kernel doc above as the canonical overview of the format itself.
 
-## Picking a target
-### Switch mapping
+# Picking a target
+## Switch mapping
 
 The board's `.dts` contains an ASCII diagram mapping every switch (sw1 through sw22) to its physical position, D-pad, face buttons, shoulder buttons, all laid out spatially, alongside a `gpio-keys-polled` node with a real child node per switch, each with label, gpios, and linux,code.
 
@@ -283,7 +280,7 @@ With that we rule out F6 as an option. Looking now for the SELECT/START pair, we
 
 We find volume up and down, on a completely different binding style. Checking with `evtest` shows a device named `odroidgo3-keys` reporting `KEY_VOLUMEUP`/`KEY_VOLUMEDOWN`. It seems, on this device, the driver reports volume.
 
-> **Further reading**
+> 📚 **Further reading**
 >
 > The `gpio-keys` device tree binding is the formal schema behind the two node styles (interrupt-driven 
 > `gpio-keys` versus timer-driven `gpio-keys-polled`) that caused the confusion here. This was pointed out
@@ -292,7 +289,7 @@ We find volume up and down, on a completely different binding style. Checking wi
 > ![event_directory](event_directory.png)
 > ![event_tests](event_test.png)
 
-### RK3326 is derived from PX30
+## RK3326 is derived from PX30
 
 With F6 ruled out, since it's unavailable, we pivot into reading an already populated pin, alongside the driver that owns it. That required real register addresses, and the board's `.dts` didn't define them directly, `&gpio2` is just a label reference.
 
@@ -316,19 +313,15 @@ That's the physical base address. The relevant register offsets within that bank
 |![pinctrl](pinctrl.png)|
 |Pin control in file.|
 
-> **Further reading** 
+> 📚 **Further reading**
 >
 > Public datasheets for the [RK3326](https://rockchip.fr/RK3326%20datasheet%20V1.1.pdf) 
 > and the [PX30](https://macrogroup.ru/upload/iblock/591/70wwf0x81arsuognouwz631cycd913va/PX30.pdf), 
 > show the pin naming used on this project (GPIO2_A0, GPIO2_A1, and so on). However, neither has a register-level 
-> memory map, nor base addresses, nor bit offsets. That gap is why the actual offsets still had to come 
+> memory map, nor base addresses, nor bit offsets. The offsets come 
 > from `drivers/pinctrl/pinctrl-rockchip.c`.
->
-> The three offsets found in that driver (0x00, 0x04, 0x50) match a publicly documented, well established, 
-> widely used register layout. [Intel's own FPGA SoC docs](https://www.intel.com/content/www/us/en/programmable/hps/agilex5/topics/addressblock_GPIO0_summary.html) describe an identical _"DW_apb_gpio"_ address block with the same 
-> three offsets under the same names, and the same layout shows up independently in FreeBSD's `dwgpio` driver, U-Boot's `dwapb_gpio.c`, and iPXE's GPIO driver, none of which have anything to do with Rockchip.
 
-## Reading the register
+# Reading the register
 
 With the address in hand, we can now do `ioremap()` plus `readl()`. We can't really use physical addresses directly with a pointer, we instead use `ioremap(phys_addr, size)` to ask the kernel to set up a virtual mapping for a specific physical range, returning a `void __iomem *`, a pointer type that prevents it being dereferenced like normal memory. `readl()` is the correct accessor, it handles the ordering and caching semantics memory-mapped I/O needs that plain memory doesn't. With this, our ***C*** driver code becomes:
 
@@ -375,7 +368,7 @@ We go for raw register read, coexisting with the built-in driver, rather than an
 
 This means only polling, each `read()` from userspace being a live snapshot at that exact instant. There is a big limitation we have to take into account for this approach: a press shorter than the gap between two reads can be missed entirely.
 
-> **Note**
+> 📝 **Note**
 >
 > We can check how `ioremap()` is used on included drivers by running:
 >
@@ -393,14 +386,14 @@ This means only polling, each `read()` from userspace being a live snapshot at t
 > |![ioremap()_ref](ioremap_ref.png)|
 > |`ioremap()` usage inside `gpio-pxa.c`. |
  
-> **Further reading** 
+> 📚 **Further reading** 
 >
 > [`Documentation/input/input-programming.rst`](https://github.com/EOS-team/EOS/blob/40c8096ed6603bf0a2e256d4d594a56048765c4c/src/RROS/Documentation/input/input-programming.rst),
 > in the kernel source tree itself, covers the `input_dev/input_report_key/input_sync` API the built-in 
 > drivers on this board use, worth reading to understand both sides of the deliberate difference between 
 > this project's approach and theirs.
 
-## Testing on R36S
+# Testing on R36S
 
 We check if the value changes depending on input. To check just that, we read the register once with nothing held, unload the module, physically hold a button, reload the module while still holding it, and compare.
 
@@ -436,23 +429,23 @@ Both are `GPIO_ACTIVE_LOW`, so bit 0 (volume up) and bit 1 (volume down) both be
 
 Once we know this works on one bank, we can scale to all three GPIO banks the board uses (_gpio1_ at 0xff250000, _gpio2_ at 0xff260000 and _gpio3_ at 0xff270000), covering all 20 real buttons: D-pad, face buttons, volume, four F-row buttons, both shoulder pairs, and the two stick-click switches (F3 / F4, which we checked via evtest to be `BTN_TRIGGER_HAPPY3` / `HAPPY4` when the stick is clicked down).
 
-> **Note**
-> 
-> A little thing to keep in mind. This kernel builds under the older ***GNU89*** dialect, which requires every 
+> 📝 **Note**
+>
+> A little thing to keep in mind. This kernel builds under the older ***GNU89*** dialect, which requires every
 > variable declaration at the very top of a block, before any executable statement. Declaring `u32 val = readl(...);`
 > partway through a function will give us a compile error.
 
-## Design: Pull vs. Push
+# Design: Pull vs. Push
 
-Now that we can read the three banks, we move onto interface design. Initially, I thought about a background kernel timer continuously refreshing a cached value, supporting blocking `read()` / `poll()` calls. 
+Now that we can read the three banks, we move onto interface design. Initially, I thought about a background kernel timer continuously refreshing a cached value, supporting blocking `read()` / `poll()` calls.
 
-So, what's the tradeoff here exactly? On one hand, a live register read on demand (the _"pull"_ model) always reflects the true state **only** at the exact moment it's called; while, on the other hand, a cached value refreshed on a timer (the _"push"_ model) is, at best, however old the last tick was. 
+So, what's the tradeoff here exactly? On one hand, a live register read on demand (the _"pull"_ model) always reflects the true state **only** at the exact moment it's called; while, on the other hand, a cached value refreshed on a timer (the _"push"_ model) is, at best, however old the last tick was.
 
 The limitation is easy to work out: a press shorter than the sampling interval behaves identically in both designs; it comes with polling itself, regardless of when the polling happens. Given that, and given this driver's actual purpose (poll-on-demand monitoring, not a real-time input pipeline), the simpler _pull_ design seems more sensible (a push design would mean: no timer, no spinlock, no wait queue, each `read()` does one live register read and returns).
 
 Now it's all about building the final 20 button bitmask and flipping raw value so that 0 means inactive and 1 active. Check the actual implementation [here](https://github.com/ph0nsy/r36s-simple-input/blob/main/simple_input.c).
 
-> **Note**
+> 📝 **Note**
 >
 > One idea from the time I was thinking on doing stick support: normalized analog stick values as float fields
 > in the shared struct.
@@ -463,9 +456,9 @@ Now it's all about building the final 20 button bitmask and flipping raw value s
 > unrelated userspace process's floating point state. 
 >
 > What we should have done is fixed-point integers (an int16_t representing a scaled range, with the true value 
-> computed as raw / 32768.0 in userspace, where floats are free to use). 
+> computed as raw / 32768.0 in userspace, where floats are free to use).
 
-## The analog sticks problem
+# The analog sticks problem
 
 Since the buttons seem to be working, the next thing is to check whether we can apply the same shadow-read approach to the analog sticks. In short: no, we can't. Now, I'll walk you through my little investigation into why.
 
@@ -487,11 +480,11 @@ With this we know the drivers can't coexist. Buttons worked as a safe shadow rea
 
 With that, the sticks are scoped out of this project: a non-invasive shadow implementation seems structurally dubious here without either replacing the built-in driver outright or building cross-driver coordination.
 
-## Where does this leave us?
+# Where does this leave us?
 
 We've gotten ourselves all 20 GPIO-backed buttons (D-pad, face buttons, volume, F1 through F5, both shoulder pairs, both stick clicks), working and checked, packed into a single 32-bit bitmask exposed through `/dev/r36s_simple_input`, running alongside every other input driver already on the device. 
 
-> **Note**
+> 📝 **Note**
 >
 > Let me give you an example of that last point that I stumbled upon in this very project. When we flip the bits to
 > make 0 inactive and 1 active when testing on volume buttons, I used `val = (-val) & 0x3;` instead of `val = (~val) & 0x3;`.
@@ -499,7 +492,7 @@ We've gotten ourselves all 20 GPIO-backed buttons (D-pad, face buttons, volume, 
 > `python3 -c "print(number & 0x3)"` the original value received and comparing with val shed some light into the
 > fact that something was not working out.
 
-## References and Resources
+# References and Resources
 
 - Source and README: https://github.com/ph0nsy/r36s-simple-input.
 - [christianhaitian/linux](https://github.com/christianhaitian/linux), the ArkOS kernel fork this driver reads alongside.

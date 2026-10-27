@@ -11,7 +11,8 @@ function BlogPage() {
 
   return (
     <PageLayout
-      //title="Blog"*/
+      title="Blog"
+      desc="Development blog with explanations of implementations and CS concepts."
       className="page--blog"
     >
       {ALL_POST_TAGS.length > 0 ? <div className="control-bar__blog">

@@ -1,9 +1,39 @@
 /* Tokens live in tokens.css. */
+body, 
+label {
+  cursor: url('../../public/assets/arrow.png') 0 0, default; /* fallback to default arrow */
+}
 body {
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
+}
+a, button,
+input[type="submit"],
+input[type="checkbox"],
+input[type="button"],
+input[type="color"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="file"],
+input[type="image"],
+input[type="radio"],
+input[type="reset"],
+input[type="tel"],
+input[type="time"],
+input[type="week"] {
+  cursor: url('../../public/assets/pointer.png') 0 0, pointer !important; /* fallback to standard pointer */
+}
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="password"],
+input[type="range"],
+input[type="search"],
+input[type="url"],
+textarea {
+  cursor: url('../../public/assets/text.png') 0 0, text !important; /* fallback to standard text cursor */
 }
 
 /* Hash links (/#contact) land below the fixed navbar instead of under it. */
@@ -213,9 +243,12 @@ html {
 }
 
 .back-link {
-  display: inline-block;
-  margin-bottom: 2rem;
   color: inherit;
+  display: inline-block;
+  font-size: medium;
+  text-decoration: none;
+  font-family: var(--font-hud);
+  margin-bottom: 2rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

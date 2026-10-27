@@ -35,6 +35,17 @@
 }
 .post__status {
   color: var(--color-text-muted);
+  text-align: center;
+  font-size: 1.5rem;
+  font-family: var(--font-hud);
+}
+.arrow {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-top: 0.25rem solid var(--color-text);
+  border-right: 0.25rem solid var(--color-text);
+  transform: rotate(-135deg) translateY(-3px);
 }
 
 /* Markdown content */
@@ -55,7 +66,7 @@
 .prose p,
 .prose ul,
 .prose ol {
-  margin: 0 0 1.2rem;
+  margin: 0.5rem 0 1.2rem;
 }
 .prose a {
   color: var(--color-primary-text);
@@ -68,9 +79,9 @@
   transition: all 0.25s ease-in;
 }
 .prose img:hover {
-  transform: scale(1.1);
+  transform: scale(1.025);
   overflow: visible;
-  object-fit: cover;
+  cursor: url('../../public/assets/pointer.png') 0 0, pointer !important; /* fallback to standard pointer */
 }
 .prose blockquote {
   margin: 1.5rem 0;
@@ -81,17 +92,23 @@
 .prose code {
   padding: 0.15em 0.35em;
   background: var(--color-border);
+  color: var(--color-primary-text);
   border-radius: 3px;
-  font-size: 0.9em;
+  font-size: 1.05rem !important;
 }
 .prose pre {
-  padding: 1rem;
   overflow-x: auto;
-  background: var(--color-border);
+  background: var(--color-surface);
   border-radius: 5px;
 }
-.prose pre code {
+.prose pre div {
+  overflow-x: auto;
+  background: var(--color-surface) !important;
+  border-radius: 12px;
+}
+.prose pre div code {
   padding: 0;
+  background: var(--color-surface) !important;
   background: none;
 }
 .prose table {
@@ -99,7 +116,6 @@
   overflow-x: auto;
   border-collapse: collapse;
 }
-
 .prose table:has(img) {
   display: flex;
   justify-content: center;
@@ -112,11 +128,11 @@
     visibility: collapse;
   }
   &:hover {
-    cursor: pointer;
+    cursor: url('../../public/assets/pointer.png') 0 0, pointer !important; /* fallback to standard pointer */
   }
 }
 .prose th,
 .prose td {
   padding: 0.4rem 0.8rem;
-  border: 1px solid var(--color-border);
+  border: 3px solid var(--color-border);
 }

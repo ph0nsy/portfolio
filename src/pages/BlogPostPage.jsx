@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
+import {materialDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-import { useDocumentTitle } from "../hooks/useDocumentTitle";
+
+import { useDocumentDescription, useDocumentImage, useDocumentTitle } from "../hooks/useDOM";
 import BackLink from "../custom_components/BackLink";
 import Modal from '../custom_components/Modal';
 import NotFoundPage from "./NotFoundPage";
@@ -13,11 +16,16 @@ import { formatDate } from "../utils/format";
 import "../styles/post.css";
 
 const IS_ABSOLUTE_URL = /^[a-z][a-z\d+.-]*:/i; // http:, https:, mailto:, data:...
+const MAX_TITLE_LEN = 20;
 
 function BlogPostPage() {
   const { slug } = useParams();
   const post = getPost(slug);
-  useDocumentTitle(post?.title ?? "Post not found");
+  let tlt = post?.title.slice(0, Math.min(post?.title.length, MAX_TITLE_LEN));
+  let fmtTitle = (tlt ?? "Post not found") + (post?.title.length > MAX_TITLE_LEN ? "..." : "");
+  useDocumentTitle(fmtTitle);
+  useDocumentDescription(post?.description);
+  useDocumentImage(post?.image);
 
   // 'loading' | 'ready' | 'error'
   const [state, setState] = useState({ status: "loading", text: "" });
@@ -30,7 +38,7 @@ function BlogPostPage() {
   // check img clicks for modal
   useEffect(() => {
     const handler = (event) => { 
-      if (event.target.tagName === "IMG") {
+      if (event.target.tagName === "IMG" && event.target.src.substr(-9) != "cover.png") {
         setIsModalImage(String(event.target.src));
         setIsModalOpen(true);
         console.log("Clicked:" + event.target.src)
@@ -103,6 +111,22 @@ function BlogPostPage() {
             {children}
           </a>
         ),
+      code: ({children, className, node, ...rest}) => {
+        const match = /language-(\w+)/.exec(className || '');
+        return match ? (
+          <SyntaxHighlighter
+            {...rest}
+            PreTag="div"
+            children={String(children).replace(/\n$/, '')}
+            language={match[1]}
+            style={materialDark}
+          />
+        ) : (
+          <code {...rest} className={className}>
+            {children}
+          </code>
+        )
+      },
     }),
     [slug]
   );
@@ -111,7 +135,7 @@ function BlogPostPage() {
 
   return (
     <article className="post">
-      <BackLink fallback="/blog">Back to all posts</BackLink>
+      <BackLink fallback="/blog"><span className="arrow"></span>     Back to all posts</BackLink>
 
       <Modal isOpen={isModalOpen} onClose={closeModal} child={modalImage}/>
 
@@ -127,8 +151,13 @@ function BlogPostPage() {
       <img className="post__cover" src={publicUrl(post.image)} alt="" />
 
       <div className="post__body prose">
-        {state.status === "loading" && (
-          <p className="post__status">Loading post...</p>
+        {/* From https://cssLoaders.github.io/ */}
+        {state.status === "loading" && (  
+          <p className="post__status">
+            Loading post...
+            <br/>
+            <span className="contact__loader"></span>
+          </p>
         )}
         {state.status === "error" && (
           <p className="post__status">

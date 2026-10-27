@@ -3,7 +3,7 @@ import Marquee from "../custom_components/Marquee";
 import LogoLoop from "../react_bits_components/LogoLoop";
 import { SKILL_ROWS } from "../data/skills";
 
-function SkillsSection({ isMobile }) {
+function SkillsSection({ isMobile, straight = false }) {
   const big = isMobile
     ? { textSize: "6vh", lineHeight: "5vh" }
     : { textSize: "12vh", lineHeight: "10vh" };
@@ -23,14 +23,14 @@ function SkillsSection({ isMobile }) {
             gap={isMobile ? 30 : row.gap}
             fadeOut
             ariaLabel={`${row.ariaLabel} skills`}
-            style={{ rotate: row.logoTilt }}
+            style={{ rotate: straight ? "0deg" : row.logoTilt }}
             hoverSpeed = {isMobile ? -160 : -280}
           />
           <Marquee
             text={row.label}
             label={row.ariaLabel}
             {...small}
-            tilt={row.labelTilt}
+            tilt={straight ? "0deg" : row.labelTilt}
             reverse={Boolean(row.invertLabel)}
           />
         </Fragment>

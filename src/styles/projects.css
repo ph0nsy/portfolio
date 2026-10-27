@@ -39,7 +39,6 @@
     transparent
   );
 }
-
 /* Panel: unclipped wrapper (filters, outline, cursor) around a clipped frame */
 .panel {
   position: relative;
@@ -112,7 +111,6 @@
   cursor: pointer;
 }
 .panel.is-open .panel__select {
-  cursor: default;
   background: none;
 }
 /* clip-path would cut a normal outline, so draw it inside the frame. */
@@ -315,10 +313,10 @@
   margin-left: auto;
 }
 .control-bar__label {
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 .control-bar__blog-label {
-  color: var(--color-text-muted);
+  color: var(--color-text);
   font-size: 1.25rem;
 }
 

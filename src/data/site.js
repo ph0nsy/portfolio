@@ -30,7 +30,7 @@ export const NAV_LINKS = [{
 	 * `hash: true` marks links that jump to a section of a page instead of to a page. For example:
 	 */ 
 	{ 
-		to: '/#contact', 
+		to: '/contact', 
 		label: 'Contact', 
 		icon: LiaEnvelopeSolid, 
 		hash: true 

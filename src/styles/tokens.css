@@ -1,22 +1,22 @@
 :root {
   /* 1. Palette */
 
-  /* Brand hues, taken from the hero (LetterGlitch and GradientText). */
-  --pink-500: #ee0b5c;     /* 4.84 on black, 4.34 on white */
-  --pink-300: #ff4d8d;     /* 6.70 on black, for pink TEXT on dark backgrounds */
-  --magenta-500: #a716b0;  /* 3.38 on black (shapes only), 6.20 under white text */
-  --indigo-500: #414c7d;   /* 3.05 on black (shapes only), used for depth in gradients */
+  /* Brand hues */
+  --pink-500: #ee0b5c;
+  --pink-300: #ff4d8d;
+  --magenta-500: #a716b0;
+  --indigo-500: #414c7d;
 
   /* Neutrals */
   --black: #000000;
-  --night-900: #0e0a14;    /* near black with a hint of violet, for raised surfaces */
-  --night-700: #221a2b;    /* borders and dividers on dark */
-  --grey-500: #8f8f8f;     /* 6.49 on black */
-  --grey-300: #cfcfcf;     /* 13.48 on black */
-  --grey-600: #555555;     /* 7.46 on white */
+  --night-900: #0e0a14;    /* Near black with a hint of violet */
+  --night-700: #221a2b;
+  --grey-500: #8f8f8f;
+  --grey-300: #cfcfcf;
+  --grey-600: #555555;
   --grey-200: #d0d0d0;
   --white: #ffffff;
-  --off-white: #f2eff5;    /* 18.44 on black, softer than pure white for long text */
+  --off-white: #f2eff5;    /* Softer than pure white */
 
   /* 2. Roles */
 
