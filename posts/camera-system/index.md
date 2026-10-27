@@ -971,7 +971,7 @@ void UCustomCameraSystemComponent::UpdateCameraContext(const float& DeltaSeconds
 
 ||
 |:---:|
-| ![Landmark diagram](landmark.jpeg) | 
+| ![Landmark diagram](Landmark.jpeg) | 
 | Diagram showing how the Landmark Component behaves. |
 
 ```cpp
